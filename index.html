@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Addis Ababa City PHEM DHIS2 Data Quality Monitoring Dashboard</title>
+<!-- FIX: tab icon uses the same logo as the header/login card -->
+<link rel="icon" href="assets/logo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/logo.png">
 <style>
 :root{
   --bg:#f5f7f9; --card:#ffffff; --ink:#14222e; --muted:#5d6f7e; --line:#e1e7ec;
@@ -209,7 +212,6 @@ td.h.clk{color:inherit}td.h.clk:hover{text-decoration:none;outline:2px solid var
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     <span class="badge" id="who" title="Signed in"></span>
     <span class="badge" id="srcBadge"><i class="dot"></i><span id="srcText">…</span></span>
-    <!-- FIX: download raw source as Excel -->
     <button id="dlRaw" title="Download the raw source data (all sheet columns, no manipulation) as Excel">⬇ Source (Excel)</button>
     <button id="refresh" title="Reload data">↻ Refresh</button>
     <button id="theme" title="Toggle light/dark">◐</button>
@@ -293,7 +295,7 @@ td.h.clk{color:inherit}td.h.clk:hover{text-decoration:none;outline:2px solid var
     </div>
     <div class="card c6">
       <h2>Reporting by facility type</h2>
-      <div class="hint">Expected vs reported vs on-time</div>
+      <div class="hint">Expected vs reported vs on-time. Health posts are not shown — in Addis Ababa they report through their parent health centre.</div>
       <div class="scroll"><table id="ftype"></table></div>
     </div>
 
@@ -364,7 +366,9 @@ const D=[ // label, cases column, deaths column
 ];
 const WATCH=["AFP / Polio","Anthrax","Cholera","Measles","Meningitis","Neonatal tetanus","Novel influenza subtype","Human rabies","Dengue fever","SARS","Smallpox","Viral hemorrhagic fever","Yellow fever","Rift Valley fever","Mpox","COVID-19","Chikungunya","Chemical poisoning","Relapsing fever","Dysentery","Diarrhea w/ dehydration U5","SAM children U5","Acute jaundice syndrome"];
 const DEATH_ONLY=[["Maternal deaths","Maternal_death"],["Perinatal deaths","Perinatal_death"]];
-const FTYPES=[["Government health posts","Gov_HPs"],["Government health centers","Gov_HCs"],["Government hospitals","Gov_Hosps"],["NGO facilities","NGOHF"],["Other facilities","OtherHFs"]];
+/* FIX: Addis Ababa has no standalone health posts — they report through their parent health centre.
+   Health-post expected/reported counts in the sheet are folded into health centres, so we don't list them. */
+const FTYPES=[["Government health centers","Gov_HCs"],["Government hospitals","Gov_Hosps"],["NGO facilities","NGOHF"],["Other facilities","OtherHFs"]];
 const DX=D.map(d=>({n:d[0],c:d[1],d:d[2]})).concat(DEATH_ONLY.map(d=>({n:d[0],c:null,d:d[1]})));
 const DXBY=Object.fromEntries(DX.map(x=>[x.n,x]));
 
@@ -453,7 +457,6 @@ function csvUrl(u){
 }
 const exportUrl=u=>{const id=sheetId(u);return id?`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gidOf(u)||"0"}`:""};
 
-/* FIX: keep the untouched source rows for the "Download source" button */
 let USER=null,DATA=[],RAW=[],RAWHEAD=[],SOURCE="",LOADED=null,FACSET=new Set();
 const atBlank=rows=>rows.filter(r=>!r._atRaw).length/Math.max(1,rows.length);
 async function load(){
@@ -463,16 +466,16 @@ async function load(){
   $("error").innerHTML="";
   let text=null,why="";
   if(sheet){
-    try{text=await fetchText(sheet);if(!text||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="Live Google Sheet"}
+    // FIX: label reflects DHIS2 hourly sync, not a generic "live sheet"
+    try{text=await fetchText(sheet);if(!text||!text.trim()||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="Live DHIS2 sync (Google Sheet mirror, hourly)"}
     catch(e){text=null;why=e.message}
   }
   if(!text&&CFG.FALLBACK_CSV){
-    text=await fetchText(CFG.FALLBACK_CSV);SOURCE="Backup CSV (sheet unreachable)";
-    if(sheet)$("error").innerHTML='<div class="err">Could not read the Google Sheet ('+esc(why)+'). Showing the backup CSV instead.</div>';
+    text=await fetchText(CFG.FALLBACK_CSV);SOURCE="Backup CSV (DHIS2 mirror unreachable)";
+    if(sheet)$("error").innerHTML='<div class="err">Could not read the DHIS2 mirror sheet ('+esc(why)+'). Showing the backup CSV instead.</div>';
   }
-  if(!text)throw new Error(sheet?"Could not read the Google Sheet ("+why+"). Check that it is shared as \u201CAnyone with the link \u2192 Viewer\u201D and that the tab (gid) in config.js is correct.":"No data source set. Add your Google Sheet link as SHEET_URL in config.js.");
+  if(!text)throw new Error(sheet?"Could not read the DHIS2 mirror sheet ("+why+"). Check that it is shared as \u201CAnyone with the link \u2192 Viewer\u201D and that the tab (gid) in config.js is correct.":"No data source set. Add your Google Sheet link as SHEET_URL in config.js.");
 
-  // FIX: keep the raw parsed objects + raw header order BEFORE prep() adds _zone, _at, etc.
   const parsedRows=parseCSV(text);
   RAWHEAD=(parsedRows[0]||[]).map(h=>h.trim());
   let rawObjs=toObjects(parsedRows);
@@ -494,8 +497,6 @@ async function load(){
   if(!USER.admin){
     const k=nrm(USER.sub);
     presentZones=[...new Set(rows.map(r=>r._zone))];
-    // filter both DATA and RAW by the same rule so the Excel download respects the sub-city
-    const keep=new Set(rows.filter(r=>nrm(r._zone)===k).map(r=>r.Health_Facility+"|"+r.Woreda+"|"+r.Year+"|"+r.Epi_Week));
     RAW=rawObjs.filter(o=>{
       const z=matchZone(o.Zone)||(num(o.No_of_Gov_Hosps_expected_by_RHB)>0?OTHER_ZONE:(o.Zone||"Unassigned"));
       return nrm(z)===k;
@@ -508,7 +509,8 @@ async function load(){
   FACSET=new Set(DATA.map(r=>String(r.Health_Facility||"").toLowerCase()));
   LOADED=new Date();
   $("srcText").textContent=SOURCE;
-  $("srcBadge").className="badge"+(SOURCE.startsWith("Live")?"":" warn");
+  // FIX: badge colour check updated to match the new label
+  $("srcBadge").className="badge"+(SOURCE.startsWith("Live DHIS2")?"":" warn");
   const withT=DATA.filter(r=>r._atTime).length,withD=DATA.filter(r=>r._atDate).length;
   $("chk").textContent=ATKEY?`“${ATKEY}” column found · date read for ${fmt(withD)} of ${fmt(DATA.length)} reports, time for ${fmt(withT)}`:"No “at:” column found in the sheet headings";
   if(!DATA.length&&!USER.admin){
@@ -565,7 +567,6 @@ async function loadCreds(){
 function showLogin(msg){
   USER=null;DATA=[];RAW=[];RAWHEAD=[];$("app").hidden=true;$("login").hidden=false;
   $("lgErr").textContent=msg||"";setBusy(false);
-  // pre-fill the remembered ID (if any) so the user only clicks Sign in
   const remembered=store.get();
   if(remembered){$("lgId").value=remembered;$("lgRemember").checked=true}
   else{$("lgId").value="";$("lgRemember").checked=true}
@@ -737,7 +738,8 @@ function render(){
   const dx=F.disease?DXBY[F.disease]:null;
   const crows=dx?rows.filter(r=>dxHas(r,dx)):rows;
   const wlabel=F.week===""?`${F.year}, all weeks`:`Epi week ${F.week}, ${F.year}`;
-  $("subtitle").textContent=`${wlabel} · ${F.facility||F.woreda||F.zone||"Addis Ababa"}${F.disease?" · "+F.disease:""} · ${fmt(rows.length)} facility reports · updated ${LOADED.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
+  // FIX: subtitle shows the DHIS2 sync date+time explicitly
+  $("subtitle").textContent=`${wlabel} · ${F.facility||F.woreda||F.zone||"Addis Ababa"}${F.disease?" · "+F.disease:""} · ${fmt(rows.length)} facility reports · DHIS2 synced ${LOADED.toLocaleString([], {hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}`;
 
   const chips=[];
   if(USER.admin?F.zone:false)chips.push(["zone","Sub-city",F.zone]);
@@ -821,8 +823,9 @@ function render(){
     (perfRows.length?perfRows.map(r=>`<tr class="clk" ${A(aLvl==="zone"?"zone":aLvl==="wor"?"woreda":"facility",r.z,{z:r.zz,w:r.w})}><td class="l">${esc(r.z)}</td><td>${fmt(r.e)}</td><td>${fmt(r.p)}</td><td>${fmt(r.o)}</td><td ${pc(pct(r.p,r.e))}>${pct(r.p,r.e)}%</td><td ${pc(pct(r.o,r.e))}>${pct(r.o,r.e)}%</td><td ${pc(pct(r.d,r.n))} data-tip="${fmt(r.d)} of ${fmt(r.n)} reports have status Completed">${pct(r.d,r.n)}%</td></tr>`).join(""):`<tr><td class="l" colspan="7"><div class="empty">No data for this selection</div></td></tr>`)+
     `</tbody><tfoot><tr><td class="l">Total</td><td>${fmt(tp.e)}</td><td>${fmt(tp.p)}</td><td>${fmt(tp.o)}</td><td ${pc(pct(tp.p,tp.e))}>${pct(tp.p,tp.e)}%</td><td ${pc(pct(tp.o,tp.e))}>${pct(tp.o,tp.e)}%</td><td ${pc(pct(tp.d,tp.n))}>${pct(tp.d,tp.n)}%</td></tr></tfoot>`;
 
+  // FIX: totals row uses all-sites columns so it matches the KPI cards exactly (no health posts included)
   const ft=FTYPES.map(([n,k])=>({n,e:S(rows,`No_of_${k}_expected_by_RHB`),p:S(rows,`No_of_${k}_Reported`),o:S(rows,`No_of_${k}_Reported_Ontime`)}));
-  const fe=ft.reduce((s,x)=>s+x.e,0),fp=ft.reduce((s,x)=>s+x.p,0),fo=ft.reduce((s,x)=>s+x.o,0);
+  const fe=S(rows,"All_Total_sites_Expected_by_RHB"),fp=S(rows,"All_Total_sites_Reported"),fo=S(rows,"All_Total_sites_Reported_Ontime");
   $("ftype").innerHTML=`<thead><tr><th class="l">Facility type</th><th>Expected</th><th>Reported</th><th>On time</th><th>Timely</th></tr></thead><tbody>`+
     ft.map(x=>`<tr><td class="l">${x.n}</td><td>${fmt(x.e)}</td><td>${fmt(x.p)}</td><td>${fmt(x.o)}</td><td>${x.e?pct(x.o,x.e)+"%":"–"}</td></tr>`).join("")+
     `</tbody><tfoot><tr><td class="l">Total</td><td>${fmt(fe)}</td><td>${fmt(fp)}</td><td>${fmt(fo)}</td><td>${fe?pct(fo,fe)+"%":"–"}</td></tr></tfoot>`;
@@ -942,7 +945,7 @@ $("prev").onclick=()=>{page=Math.max(0,page-1);renderTable(sel(),curRows())};$("
 $("export").onclick=()=>download(`idsr_${F.year}_w${F.week||"all"}.csv`,
   [csvLine(tblCols.map(c=>c[0]))].concat(tblRows.map(r=>csvLine(tblCols.map(c=>r[c[1]])))));
 
-/* ---------------- FIX: download raw source as a real .xlsx ---------------- */
+/* ---------------- download raw source as a real .xlsx ---------------- */
 let XLSX_PROMISE=null;
 function loadXLSX(){
   if(window.XLSX)return Promise.resolve(window.XLSX);
@@ -958,7 +961,6 @@ function loadXLSX(){
   return XLSX_PROMISE;
 }
 function rawRowsForExport(){
-  // Use RAW (untouched objects) and RAWHEAD (original column order), then keep only what the user can see.
   const cols=RAWHEAD.slice();
   return RAW.map(o=>cols.map(c=>o[c]??""));
 }
@@ -974,11 +976,8 @@ async function downloadSourceExcel(){
     try{
       const XLSX=await loadXLSX();
       const ws=XLSX.utils.aoa_to_sheet([RAWHEAD,...rows]);
-      // auto-ish column widths
       ws["!cols"]=RAWHEAD.map(h=>({wch:Math.min(40,Math.max(10,String(h).length+2))}));
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,"Source");
-      // also add a small "About" sheet so the file is self-describing
+      const wb2=XLSX.utils.book_new();
       const info=[
         ["Dashboard","Addis Ababa City PHEM DHIS2 Data Quality Monitoring Dashboard"],
         ["Source",SOURCE],
@@ -986,14 +985,12 @@ async function downloadSourceExcel(){
         ["Signed in as",USER.admin?"Addis Ababa PHEM (all sub-cities)":USER.sub],
         ["Rows in this file",rows.length],
         ["Columns",RAWHEAD.length],
-        ["Note","Raw, unmodified rows as fetched from the Google Sheet. No dashboard calculations are applied."]
+        ["Note","Raw, unmodified rows as fetched from the DHIS2 mirror (Google Sheet). No dashboard calculations are applied."]
       ];
-      const wb2=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb2,XLSX.utils.aoa_to_sheet(info),"About");
       XLSX.utils.book_append_sheet(wb2,ws,"Source");
       XLSX.writeFile(wb2,name,{bookType:"xlsx",compression:true});
     }catch(e){
-      // Fallback: CSV with the same data, so the button always works
       const lines=[csvLine(RAWHEAD)].concat(rows.map(r=>csvLine(r)));
       download(name.replace(/\.xlsx$/,".csv"),lines);
       alert("Excel library unavailable ("+e.message+").\nA CSV with the same raw source rows has been downloaded instead.");
@@ -1015,6 +1012,16 @@ function showErr(e){$("error").innerHTML='<div class="err">'+esc(e.message)+(loc
     const img=$(i),fb=$(f);img.onerror=()=>{img.style.display="none";fb.style.display="flex"};img.src=CFG.LOGO||"assets/logo.png";
   }
   const nav=$("nav");const f=()=>nav.classList.toggle("sm",scrollY>40);addEventListener("scroll",f,{passive:true});f();
+})();
+/* FIX: keep the tab icon in sync with CFG.LOGO so both the header logo and the favicon match */
+(function favicon(){
+  const href=CFG.LOGO||"assets/logo.png";
+  const rels=["icon","apple-touch-icon","shortcut icon"];
+  rels.forEach(r=>{
+    let l=document.querySelector(`link[rel="${r}"]`);
+    if(!l){l=document.createElement("link");l.rel=r;document.head.appendChild(l)}
+    l.href=href;
+  });
 })();
 (async function start(){
   const sid=store.get();
