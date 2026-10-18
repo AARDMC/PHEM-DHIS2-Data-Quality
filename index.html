@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Addis Ababa City PHEM DHIS2 Data Quality Monitoring Dashboard</title>
+<style>
+:root{
+  --bg:#f5f7f9; --card:#ffffff; --ink:#14222e; --muted:#5d6f7e; --line:#e1e7ec;
+  --accent:#0f7b8a; --accent-soft:#d6eef1; --warn:#c2410c; --warn-soft:#fde8dc; --good:#1f8a4c; --bad:#b42318;
+  --heat:15,123,138;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1720; --card:#16222d; --ink:#e8eef3; --muted:#93a4b3; --line:#243543;
+    --accent:#3cc0d0; --accent-soft:#12404a; --warn:#fb923c; --warn-soft:#3a2415; --good:#4ade80; --bad:#f87171;
+    --heat:60,192,208;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1720; --card:#16222d; --ink:#e8eef3; --muted:#93a4b3; --line:#243543;
+  --accent:#3cc0d0; --accent-soft:#12404a; --warn:#fb923c; --warn-soft:#3a2415; --good:#4ade80; --bad:#f87171;
+  --heat:60,192,208;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.nav{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:12px 22px;color:#fff;
+  background:linear-gradient(110deg,#1e1b4b 0%,#4c1d95 42%,#0e7490 100%);border-bottom:3px solid transparent;border-image:linear-gradient(90deg,#f59e0b,#ec4899,#22d3ee) 1;
+  box-shadow:0 6px 22px rgba(30,27,75,.35);transition:padding .2s ease}
+.nav.sm{padding:6px 22px}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.logo{width:50px;height:50px;border-radius:12px;object-fit:contain;background:rgba(255,255,255,.95);padding:4px;flex:none;transition:all .2s ease}
+.logo.fb{display:none;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#4c1d95;letter-spacing:.02em}
+.nav.sm .logo{width:36px;height:36px}
+.nav h1{font-size:clamp(14px,1.9vw,21px);margin:0;font-weight:700;letter-spacing:-.01em;line-height:1.2;color:#fff}
+.nav .by{font-size:12px;color:#c7d2fe;margin-top:2px;letter-spacing:.03em}
+.nav.sm .by{display:none}
+.nav button{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.nav button:hover{background:rgba(255,255,255,.26);border-color:#fff}
+.nav .badge{background:rgba(255,255,255,.18);color:#fff}
+.nav .badge.warn{background:#fde68a;color:#7c2d12}
+.ctx{padding:10px 22px 0;color:var(--muted);font-size:12.5px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 0 28px}
+.sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+button,select,input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button{cursor:pointer}button:hover{border-color:var(--accent)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;padding:6px 20px 14px;align-items:end}
+.filters label{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);gap:3px}
+main{padding:0 20px 40px;max-width:1500px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .l{color:var(--muted);font-size:12px}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:11.5px;color:var(--muted)}
+.kpi.alert .v{color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.card h2{font-size:14px;margin:0 0 2px;font-weight:650}
+.card .hint{color:var(--muted);font-size:12px;margin-bottom:10px}
+.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+@media(max-width:1000px){.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:minmax(90px,36%) 1fr 56px;gap:8px;align-items:center;font-size:12.5px}
+.bar .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .t{height:12px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.bar .x{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:11.5px;cursor:pointer;position:sticky;top:0;background:var(--card)}
+.scroll{overflow:auto;max-height:420px}
+.pbar{display:inline-block;width:56px;height:6px;background:var(--line);border-radius:4px;margin-right:6px;vertical-align:middle;overflow:hidden}
+.pbar i{display:block;height:100%}
+.sum{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 8px;font-size:12.5px;color:var(--muted)}
+.sum b{color:var(--ink);font-size:15px}
+.heat td.h{font-variant-numeric:tabular-nums}
+.watch{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.w{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.w b{font-size:18px;display:block}
+.w.on{border-color:var(--bad);background:var(--warn-soft)}
+.w.on b{color:var(--bad)}
+.w span{font-size:11.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pager{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--muted)}
+#tip{position:fixed;pointer-events:none;background:#0b1620;color:#fff;font-size:12px;padding:5px 9px;border-radius:7px;display:none;z-index:9;max-width:260px}
+.empty{color:var(--muted);padding:18px 0;text-align:center}
+svg text{fill:var(--muted);font-size:11px}
+.err{background:var(--warn-soft);color:var(--warn);padding:10px 14px;border-radius:10px;margin:0 20px 12px}
+</style>
+</head>
+<body>
+<header class="nav" id="nav">
+  <div class="brand">
+    <img id="logo" class="logo" alt="AARDMC logo">
+    <span id="logoFb" class="logo fb">AA</span>
+    <div>
+      <h1 id="title">Addis Ababa City PHEM DHIS2 Data Quality Monitoring Dashboard</h1>
+      <div class="by" id="by">Designed by: AARDMC</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="badge" id="srcBadge"><i class="dot"></i><span id="srcText">…</span></span>
+    <button id="refresh" title="Reload data">↻ Refresh</button>
+    <button id="theme" title="Toggle light/dark">◐</button>
+  </div>
+</header>
+<div class="ctx" id="subtitle">Loading…</div>
+<div id="error"></div>
+<div class="filters">
+  <label>Year<select id="fYear"></select></label>
+  <label>Epi week<select id="fWeek"></select></label>
+  <label>Sub-city / zone<select id="fZone"></select></label>
+  <label>Woreda<select id="fWoreda"></select></label>
+  <label>Report status<select id="fStatus"></select></label>
+  <button id="reset">Reset filters</button>
+</div>
+<main>
+  <section class="kpis" id="kpis"></section>
+  <section class="grid">
+    <div class="card c7">
+      <h2>Disease burden</h2>
+      <div class="hint" id="burdenHint">Total reported cases for the selection</div>
+      <div class="bars" id="burden"></div>
+    </div>
+    <div class="card c5">
+      <h2>Epidemic-prone &amp; priority watchlist</h2>
+      <div class="hint">Highlighted when ≥1 case/death reported in the selection</div>
+      <div class="watch" id="watch"></div>
+    </div>
+
+    <div class="card c12">
+      <h2>Sub-city heatmap</h2>
+      <div class="hint">Cases by sub-city and disease. Darker = higher relative to the column maximum.</div>
+      <div class="scroll"><table class="heat" id="heat"></table></div>
+    </div>
+
+    <div class="card c12">
+      <h2>Completeness &amp; timeliness explorer</h2>
+      <div class="hint">Completeness = reported ÷ expected · Timeliness = on time ÷ expected · Public/Government hospitals = facilities expected as government hospitals (No_of_Gov_Hosps_expected_by_RHB); they report directly, not under a sub-city. Click a column to sort.</div>
+      <div class="tabs" id="pxTabs"></div>
+      <div class="sum" id="pxSum"></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <label style="display:flex;gap:6px;align-items:center;color:var(--muted)"><input type="checkbox" id="pxOnly"> Only units below 100% (completeness, timeliness or status)</label>
+        <button id="pxExport">⬇ Export CSV</button>
+      </div>
+      <div class="scroll" style="max-height:480px"><table id="px"></table></div>
+    </div>
+
+    <div class="card c6">
+      <h2>Trend by epi week</h2>
+      <div class="tabs" id="trendTabs"></div>
+      <div id="trend"></div>
+    </div>
+    <div class="card c6">
+      <h2>Top areas</h2>
+      <div class="tabs" id="areaTabs"></div>
+      <div class="bars" id="areas"></div>
+    </div>
+
+    <div class="card c6">
+      <h2>Reporting performance by sub-city</h2>
+      <div class="hint">Completeness = reported ÷ expected sites · Timeliness = on-time ÷ expected</div>
+      <div class="scroll"><table id="perf"></table></div>
+    </div>
+    <div class="card c6">
+      <h2>Reporting by facility type</h2>
+      <div class="hint">Expected vs reported vs on-time</div>
+      <div class="scroll"><table id="ftype"></table></div>
+      <h2 style="margin-top:14px">Completeness status</h2>
+      <div class="hint">Status recorded on each facility report</div>
+      <div class="bars" id="byStatus"></div>
+      <h2 style="margin-top:14px">Reports submitted by day</h2>
+      <div class="bars" id="byDay"></div>
+    </div>
+
+    <div class="card c12">
+      <h2>Facility reports</h2>
+      <div class="hint">Search, sort and export the facility-level rows for the current selection</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+        <input id="q" placeholder="Search facility, woreda, reporter…" style="min-width:260px">
+        <label style="display:flex;gap:6px;align-items:center;color:var(--muted)"><input type="checkbox" id="onlyCases"> Only facilities with a reportable case/death</label>
+        <button id="export">⬇ Export CSV</button>
+      </div>
+      <div class="scroll" style="max-height:520px"><table id="tbl"></table></div>
+      <div class="pager"><span id="pinfo"></span><span><button id="prev">‹ Prev</button> <button id="next">Next ›</button></span></div>
+    </div>
+  </section>
+  <footer id="foot">Designed by: AARDMC</footer>
+</main>
+<div id="tip"></div>
+<script src="config.js"></script>
+<script>
+"use strict";
+/* ---------------- configuration of indicators ---------------- */
+const SUBCITIES=["Addis Ketema","Akaki Kality","Arada","Bole","Gulele","Kirkos","Kolfe Keranyo","Lideta","Lemi Kura","Nifas Silk Lafto","Yeka"];
+const OTHER_ZONE="Public/Government Hospitals";
+const D=[ // label, cases column, deaths column, key
+ ["Hypertension (new)","Hypertention_new_Total_Cases","Hypertention_new_InP_Deaths"],
+ ["Malaria (confirmed + clinical)","Total_Malaria_Confirmed_and_Clinical","TMalaria_InP_Deaths"],
+ ["Severe pneumonia U5","Sever_pneumonia_in_children_U5_Total_Cases","Sever_pneumonia_in_children_U5_InP_Deaths"],
+ ["Diabetes mellitus (new)","Diabetic_Mellitus_new_Total_Cases","Diabetic_Mellitus_new_InP_Deaths"],
+ ["Scabies","Scabies_total_Cases","Scabies_InP_Death"],
+ ["Tuberculosis (new)","Tuberculosis_new_Total_Cases","Tuberculosis_new_InP_Deaths"],
+ ["HIV (new)","HIV_new_Total_Cases","HIV_new_InP_Deaths"],
+ ["MAM children U5","MAM_U5C_Total_Cases",null],
+ ["MAM pregnant/lactating","MAM_PLW_Total_Cases",null],
+ ["SAM children U5","SAM_U5_Total_Cases","SAM_InP_Deaths"],
+ ["Brucellosis","Brucellosis_Cases","Brucellosis_Deaths"],
+ ["Dog bite","Dog_Bite",null],
+ ["Diarrhea w/ dehydration U5","Diarrhea_with_dehydration_U5_Total_Cases","Diarrhea_with_dehydration_U5__InP_Deaths"],
+ ["Dysentery","Dysentery_total_Cases","Dysentery_InP_Deaths"],
+ ["Acute jaundice syndrome","Acute_jaundice_syndrome_within_14_days_of_illness_Total_Cases","Acute_jaundice_syndrome_within_14_days_of_illness_InP_Deaths"],
+ ["Relapsing fever","Relapsing_fever_total_Cases","Relapsing_fever_InP_Deaths"],
+ ["Meningitis","Meningits_total_Cases","Meningitis_InP_Deaths"],
+ ["Suspected rabies exposure","Suspected_rabies_exposure_Cases","Suspected_rabies_exposure_Deaths"],
+ ["Chikungunya","Chikungunya_Total_Cases","Chikungunya_InP_Deaths"],
+ ["Measles","Measles_Cases","Measles_Deaths"],
+ ["Cholera","Cholera_Cases","Cholera_Deaths"],
+ ["AFP / Polio","AFP_Polio_Cases","AFP_Polior_Deaths"],
+ ["Anthrax","Anthrax_Cases","Anthrax_Deaths"],
+ ["AEFI","AEFI_Total_Cases","AEFI_InP_Deaths"],
+ ["COVID-19","COVID_19_Total_Cases","COVID_19_Deaths"],
+ ["Mpox","Monkeypox_virus_Cases","Monkeypox_virus_Deaths"],
+ ["Dengue fever","Dengue_fever_Cases","Dengue_fever_Deaths"],
+ ["Neonatal tetanus","Neonatal_Tetanus_Cases","Neonatal_Tetanus_Deaths"],
+ ["Human rabies","Human_Rabies_Cases","Human_Rabies_Deaths"],
+ ["Viral hemorrhagic fever","Viral_hemorrhagic_fever_Cases","Viral_hemorrhagic_fever_Deaths"],
+ ["Yellow fever","Yellow_fever_Cases","Yellow_fever_Deaths"],
+ ["Rift Valley fever","Rift_Valley_Fever_Cases","Rift_Valley_Fever_Deaths"],
+ ["Novel influenza subtype","Human_influenza_caused_by_new_subtype_Cases","Human_influenza_caused_by_new_subtype_Deaths"],
+ ["SARS","SARS_Cases","SARS_Deaths"],
+ ["Smallpox","Small_pox_Cases","Small_pox_Deaths"],
+ ["Guinea worm","Dracuncunculiasis_Guinea_worm_Cases","Dracunculiasis_Guinea_worm_Deaths"],
+ ["Chemical poisoning","Chemical_Poisoning_Cases","Chemical_Poisoning_Deaths"],
+ ["Obstetric fistula","Obstetric_fistula_Cases","Obstetric_fistula_Deaths"]
+];
+const WATCH=["AFP / Polio","Anthrax","Cholera","Measles","Meningitis","Neonatal tetanus","Novel influenza subtype","Human rabies","Dengue fever","SARS","Smallpox","Viral hemorrhagic fever","Yellow fever","Rift Valley fever","Mpox","COVID-19","Chikungunya","Chemical poisoning","Relapsing fever","Dysentery","Diarrhea w/ dehydration U5","SAM children U5","Acute jaundice syndrome"];
+const DEATH_ONLY=[["Maternal deaths","Maternal_death"],["Perinatal deaths","Perinatal_death"]];
+const FTYPES=[["Government health posts","Gov_HPs"],["Government health centers","Gov_HCs"],["Government hospitals","Gov_Hosps"],["NGO facilities","NGOHF"],["Other facilities","OtherHFs"]];
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+
+/* ---------------- CSV loading ---------------- */
+function parseCSV(text){
+  const rows=[];let row=[],cur="",q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++} else q=false } else cur+=c }
+    else if(c==='"') q=true;
+    else if(c===","){row.push(cur);cur=""}
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&text[i+1]==="\n")i++; row.push(cur);cur=""; if(row.length>1||row[0]!=="")rows.push(row); row=[] }
+    else cur+=c;
+  }
+  if(cur!==""||row.length){row.push(cur);rows.push(row)}
+  return rows;
+}
+function toObjects(rows){
+  const head=rows[0].map(h=>h.trim());
+  return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=(r[i]??"").trim());return o})
+    .filter(o=>o.Health_Facility||o.Woreda); // drop blank/footer rows
+}
+function prep(o){
+  o._zone=SUBCITIES.includes(o.Zone)?o.Zone:(num(o.No_of_Gov_Hosps_expected_by_RHB)>0?OTHER_ZONE:(o.Zone||"Unassigned"));
+  o._status=(o["Completeness Status"]||"").trim()||"Not set";
+  o._year=num(o.Year);o._week=num(o.Epi_Week);
+  o._tot=D.reduce((s,d)=>s+num(o[d[1]]),0);
+  o._death=D.reduce((s,d)=>s+(d[2]?num(o[d[2]]):0),0)+DEATH_ONLY.reduce((s,d)=>s+num(o[d[1]]),0);
+  const m=(o["at:"]||"").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  o._at=m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:"";
+  o._watch=WATCH.reduce((s,k)=>{const d=D.find(x=>x[0]===k);return s+num(o[d[1]])+(d[2]?num(o[d[2]]):0)},0)+num(o.Maternal_death);
+  return o;
+}
+async function fetchText(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.text()}
+let DATA=[],SOURCE="",LOADED=null;
+function csvUrl(u){
+  if(!u)return "";
+  if(/\/spreadsheets\/d\/e\//.test(u)||/output=csv|tqx=out:csv|format=csv/.test(u))return u;
+  const m=u.match(/\/spreadsheets\/d\/([\w-]+)/);if(!m)return u;
+  const g=(u.match(/[?#&]gid=(\d+)/)||[])[1]||"0";
+  return `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&gid=${g}&headers=1`;
+}
+async function load(){
+  const cfg=window.IDSR_CONFIG||{};
+  const sheet=csvUrl(new URLSearchParams(location.search).get("sheet")||cfg.SHEET_URL||cfg.SHEET_CSV_URL||"");
+  $("error").innerHTML="";
+  let text=null,why="";
+  if(sheet){
+    try{text=await fetchText(sheet);if(!text||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="Live Google Sheet"}
+    catch(e){text=null;why=e.message}
+  }
+  if(!text&&cfg.FALLBACK_CSV){
+    text=await fetchText(cfg.FALLBACK_CSV);SOURCE="Backup CSV (sheet unreachable)";
+    if(sheet)$("error").innerHTML='<div class="err">Could not read the Google Sheet ('+esc(why)+'). Showing the backup CSV instead.</div>';
+  }
+  if(!text)throw new Error(sheet?"Could not read the Google Sheet ("+why+"). Check that it is shared as \u201CAnyone with the link \u2192 Viewer\u201D and that the tab (gid) in config.js is correct.":"No data source set. Add your Google Sheet link as SHEET_URL in config.js.");
+  DATA=toObjects(parseCSV(text)).map(prep);
+  LOADED=new Date();
+  $("srcText").textContent=SOURCE;
+  $("srcBadge").className="badge"+(SOURCE.startsWith("Live")?"":" warn");
+  initFilters();render();
+}
+
+/* ---------------- filters ---------------- */
+const F={year:"",week:"",zone:"",woreda:"",status:""};
+const isDone=s=>/^completed?$/i.test(String(s).trim());
+function opts(sel,vals,all,keep){
+  const cur=keep??sel.value;
+  sel.innerHTML=(all?`<option value="">${all}</option>`:"")+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");
+  sel.value=vals.map(String).includes(String(cur))||cur===""?cur:(all?"":vals[0]);
+}
+function initFilters(){
+  const years=[...new Set(DATA.map(r=>r._year))].sort((a,b)=>b-a);
+  if(!F.year||!years.includes(+F.year))F.year=String(years[0]??"");
+  opts($("fYear"),years,"",F.year);
+  fillWeeks();
+  fillZones();
+  fillStatuses();
+}
+function fillStatuses(){
+  const st=[...new Set(DATA.map(r=>r._status))].sort();
+  opts($("fStatus"),st,"All statuses",F.status);F.status=$("fStatus").value;
+}
+function fillWeeks(){
+  const wk=[...new Set(DATA.filter(r=>String(r._year)===F.year).map(r=>r._week))].sort((a,b)=>b-a);
+  const s=$("fWeek");
+  s.innerHTML='<option value="">All weeks</option>'+wk.map(w=>`<option value="${w}">Week ${w}</option>`).join("");
+  if(F.week===""||!wk.includes(+F.week)) F.week=F._weekTouched&&F.week===""?"":String(wk[0]??"");
+  s.value=F.week;
+}
+function fillZones(){
+  const zs=[...SUBCITIES.filter(z=>DATA.some(r=>r._zone===z)),...(DATA.some(r=>r._zone===OTHER_ZONE)?[OTHER_ZONE]:[])];
+  opts($("fZone"),zs,"All sub-cities",F.zone);F.zone=$("fZone").value;
+  fillWoredas();
+}
+function fillWoredas(){
+  const ws=[...new Set(DATA.filter(r=>!F.zone||r._zone===F.zone).map(r=>r.Woreda).filter(Boolean))].sort();
+  opts($("fWoreda"),ws,"All woredas",F.woreda);F.woreda=$("fWoreda").value;
+}
+$("fYear").onchange=e=>{F.year=e.target.value;F.week="";F._weekTouched=false;fillWeeks();render()};
+$("fWeek").onchange=e=>{F.week=e.target.value;F._weekTouched=true;render()};
+$("fZone").onchange=e=>{F.zone=e.target.value;F.woreda="";fillWoredas();render()};
+$("fWoreda").onchange=e=>{F.woreda=e.target.value;render()};
+$("fStatus").onchange=e=>{F.status=e.target.value;page=0;render()};
+$("reset").onclick=()=>{F.zone="";F.woreda="";F.week="";F.status="";F._weekTouched=false;fillWeeks();fillZones();fillStatuses();render()};
+
+const base=()=>DATA.filter(r=>(!F.zone||r._zone===F.zone)&&(!F.woreda||r.Woreda===F.woreda));
+const sel=()=>base().filter(r=>String(r._year)===F.year&&(F.week===""||String(r._week)===F.week)&&(!F.status||r._status===F.status));
+const S=(rows,c)=>rows.reduce((s,r)=>s+num(r[c]),0);
+const tipEl=$("tip");
+document.addEventListener("mousemove",e=>{
+  const t=e.target.closest("[data-tip]");
+  if(t){tipEl.textContent=t.dataset.tip;tipEl.style.display="block";tipEl.style.left=Math.min(e.clientX+12,innerWidth-270)+"px";tipEl.style.top=(e.clientY+14)+"px"}
+  else tipEl.style.display="none";
+});
+
+/* ---------------- render ---------------- */
+let trendKey="Hypertension (new)",areaKey="Hypertension (new)",page=0,sortKey="_tot",sortDir=-1;
+function bars(el,items,max){
+  max=max??Math.max(1,...items.map(i=>i.v));
+  el.innerHTML=items.length?items.map(i=>`<div class="bar" data-tip="${esc(i.n)}: ${fmt(i.v)}${i.s?" · "+esc(i.s):""}"><span class="n">${esc(i.n)}</span><span class="t"><i style="width:${Math.max(i.v?1.5:0,i.v/max*100)}%"></i></span><span class="x">${fmt(i.v)}</span></div>`).join(""):'<div class="empty">No data for this selection</div>';
+}
+function render(){
+  const rows=sel(),all=base();
+  const wlabel=F.week===""?`${F.year}, all weeks`:`Epi week ${F.week}, ${F.year}`;
+    $("subtitle").textContent=`${wlabel} · ${F.woreda||F.zone||"Addis Ababa"} · ${fmt(rows.length)} facility reports · updated ${LOADED.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
+
+  /* KPIs */
+  const exp=S(rows,"All_Total_sites_Expected_by_RHB"),rep=S(rows,"All_Total_sites_Reported"),ont=S(rows,"All_Total_sites_Reported_Ontime");
+  const dsum=k=>{const d=D.find(x=>x[0]===k);return S(rows,d[1])};
+  const totalCases=rows.reduce((s,r)=>s+r._tot,0),deaths=rows.reduce((s,r)=>s+r._death,0);
+  const watchOn=WATCH.filter(k=>{const d=D.find(x=>x[0]===k);return S(rows,d[1])+(d[2]?S(rows,d[2]):0)>0}).length;
+  const K=[
+   ["Facilities reported",fmt(rep),`of ${fmt(exp)} expected`],
+   ["Completeness",pct(rep,exp)+"%","reported ÷ expected"],
+   ["Timeliness",pct(ont,exp)+"%",`${fmt(exp-ont)} not on time`],
+   ["Reports completed",pct(rows.filter(r=>isDone(r._status)).length,rows.length)+"%",`${fmt(rows.filter(r=>isDone(r._status)).length)} of ${fmt(rows.length)} reports · status "Completed"`,rows.some(r=>!isDone(r._status))],
+   ["Total reported cases",fmt(totalCases),"all tracked diseases"],
+   ["Malaria",fmt(dsum("Malaria (confirmed + clinical)")),`${fmt(S(rows,"TMSuspected_Fever_Examined"))} fever cases examined`],
+   ["Hypertension (new)",fmt(dsum("Hypertension (new)")),""],
+   ["Severe pneumonia U5",fmt(dsum("Severe pneumonia U5")),`${fmt(S(rows,"Sever_pneumonia_in_children_U5_InP_Cases"))} admitted`],
+   ["Diabetes (new)",fmt(dsum("Diabetes mellitus (new)")),""],
+   ["Maternal deaths",fmt(S(rows,"Maternal_death")),"reported",S(rows,"Maternal_death")>0],
+   ["Perinatal deaths",fmt(S(rows,"Perinatal_death")),"reported",S(rows,"Perinatal_death")>0],
+   ["All deaths reported",fmt(deaths),"incl. maternal & perinatal",deaths>0],
+   ["Watchlist signals",String(watchOn),"priority diseases with ≥1 report",watchOn>0]
+  ];
+  $("kpis").innerHTML=K.map(k=>`<div class="kpi${k[3]?" alert":""}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join("");
+
+  /* burden */
+  const burden=D.map(d=>({n:d[0],v:S(rows,d[1]),s:d[2]?`${fmt(S(rows,d[2]))} deaths`:""})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  $("burdenHint").textContent=`Total reported cases · ${wlabel}`;
+  bars($("burden"),burden.slice(0,14));
+
+  /* watchlist */
+  const wl=[...WATCH.map(k=>{const d=D.find(x=>x[0]===k);return[k,S(rows,d[1]),d[2]?S(rows,d[2]):0]}),["Maternal death",S(rows,"Maternal_death"),null]];
+  $("watch").innerHTML=wl.map(([k,c,dd])=>{const on=c+(dd||0)>0;return `<div class="w${on?" on":""}"><b>${fmt(c)}</b>${esc(k)}<br><span>${dd!=null?fmt(dd)+" deaths":"deaths"}</span></div>`}).join("");
+
+  /* heatmap */
+  const topD=burden.slice(0,9).map(b=>b.n);
+  const zones=[...new Set(rows.map(r=>r._zone))].sort((a,b)=>a.localeCompare(b));
+  const mat=zones.map(z=>topD.map(k=>{const d=D.find(x=>x[0]===k);return S(rows.filter(r=>r._zone===z),d[1])}));
+  const cmax=topD.map((_,j)=>Math.max(1,...mat.map(m=>m[j])));
+  $("heat").innerHTML=`<thead><tr><th class="l">Sub-city</th><th>Facilities</th>${topD.map(k=>`<th>${esc(k)}</th>`).join("")}<th>Total</th></tr></thead><tbody>`+
+    zones.map((z,i)=>{const zr=rows.filter(r=>r._zone===z);return `<tr><td class="l">${esc(z)}</td><td>${fmt(zr.length)}</td>${mat[i].map((v,j)=>{const a=v/cmax[j];return `<td class="h" style="background:rgba(var(--heat),${(a*.55).toFixed(2)})" data-tip="${esc(z)} · ${esc(topD[j])}: ${fmt(v)}">${fmt(v)}</td>`}).join("")}<td><b>${fmt(mat[i].reduce((a,b)=>a+b,0))}</b></td></tr>`}).join("")+"</tbody>";
+
+  /* tabs */
+  const names=D.map(d=>d[0]).filter(k=>S(all,D.find(x=>x[0]===k)[1])>0);
+  if(!names.includes(trendKey))trendKey=names[0]||trendKey;
+  if(!names.includes(areaKey))areaKey=names[0]||areaKey;
+  const topNames=names.map(n=>[n,S(all,D.find(x=>x[0]===n)[1])]).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]);
+  const tabs=(el,cur,fn)=>{el.innerHTML=topNames.map(n=>`<button class="${n===cur?"on":""}" data-k="${esc(n)}">${esc(n)}</button>`).join("");el.querySelectorAll("button").forEach(b=>b.onclick=()=>{fn(b.dataset.k);render()})};
+  tabs($("trendTabs"),trendKey,k=>trendKey=k);tabs($("areaTabs"),areaKey,k=>areaKey=k);
+
+  /* trend */
+  const td=D.find(x=>x[0]===trendKey);
+  const pts={};
+  all.filter(r=>String(r._year)===F.year).forEach(r=>{pts[r._week]=(pts[r._week]||0)+num(r[td[1]])});
+  const wks=Object.keys(pts).map(Number).sort((a,b)=>a-b);
+  $("trend").innerHTML=trendSVG(wks.map(w=>[w,pts[w]]),trendKey);
+
+  /* areas */
+  const ad=D.find(x=>x[0]===areaKey);
+  const byWoreda=!!F.zone&&!F.woreda;
+  const keyOf=r=>F.woreda?r.Health_Facility:(F.zone?r.Woreda:r._zone);
+  const agg={};rows.forEach(r=>{const k=keyOf(r);agg[k]=(agg[k]||0)+num(r[ad[1]])});
+  bars($("areas"),Object.entries(agg).map(([n,v])=>({n,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,12));
+
+  /* performance */
+  const perfRows=zones.map(z=>{const zr=rows.filter(r=>r._zone===z);const e=S(zr,"All_Total_sites_Expected_by_RHB"),p=S(zr,"All_Total_sites_Reported"),o=S(zr,"All_Total_sites_Reported_Ontime");return{z,e,p,o,n:zr.length,d:zr.filter(x=>isDone(x._status)).length}});
+  const colr=v=>v>=95?"var(--good)":v>=80?"var(--warn)":"var(--bad)";
+  $("perf").innerHTML=`<thead><tr><th class="l">Sub-city</th><th>Expected</th><th>Reported</th><th>On time</th><th>Complete</th><th>Timely</th><th>Status completed</th></tr></thead><tbody>`+
+    perfRows.map(r=>`<tr><td class="l">${esc(r.z)}</td><td>${fmt(r.e)}</td><td>${fmt(r.p)}</td><td>${fmt(r.o)}</td><td style="color:${colr(pct(r.p,r.e))};font-weight:600">${pct(r.p,r.e)}%</td><td style="color:${colr(pct(r.o,r.e))};font-weight:600">${pct(r.o,r.e)}%</td><td style="color:${colr(pct(r.d,r.n))};font-weight:600" data-tip="${fmt(r.d)} of ${fmt(r.n)} reports have status Completed">${pct(r.d,r.n)}%</td></tr>`).join("")+"</tbody>";
+
+  $("ftype").innerHTML=`<thead><tr><th class="l">Facility type</th><th>Expected</th><th>Reported</th><th>On time</th><th>Timely</th></tr></thead><tbody>`+
+    FTYPES.map(([n,k])=>{const e=S(rows,`No_of_${k}_expected_by_RHB`),p=S(rows,`No_of_${k}_Reported`),o=S(rows,`No_of_${k}_Reported_Ontime`);return `<tr><td class="l">${n}</td><td>${fmt(e)}</td><td>${fmt(p)}</td><td>${fmt(o)}</td><td>${e?pct(o,e)+"%":"–"}</td></tr>`}).join("")+"</tbody>";
+
+  const stc={};rows.forEach(r=>stc[r._status]=(stc[r._status]||0)+1);
+  bars($("byStatus"),Object.entries(stc).sort((a,b)=>b[1]-a[1]).map(([n,v])=>({n,v,s:pct(v,rows.length)+"% of reports"})));
+  const days={};rows.forEach(r=>{if(r._at)days[r._at]=(days[r._at]||0)+1});
+  bars($("byDay"),Object.entries(days).sort().map(([d,v])=>({n:new Date(d+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}),v})));
+
+  renderTable(rows);
+  renderPerfX(rows);
+}
+function trendSVG(p,label){
+  if(!p.length)return '<div class="empty">No data</div>';
+  const W=560,H=210,m={l:42,r:14,t:12,b:28};
+  const xs=p.map(a=>a[0]),ys=p.map(a=>a[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),ymax=Math.max(1,...ys)*1.12;
+  const X=x=>x1===x0?(W+m.l-m.r)/2:m.l+(x-x0)/(x1-x0)*(W-m.l-m.r),Y=y=>H-m.b-y/ymax*(H-m.t-m.b);
+  let g="";for(let i=0;i<=4;i++){const v=ymax*i/4;g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
+  const path=p.map((a,i)=>(i?"L":"M")+X(a[0]).toFixed(1)+","+Y(a[1]).toFixed(1)).join("");
+  const area=p.length>1?`<path d="${path}L${X(x1)},${Y(0)}L${X(x0)},${Y(0)}Z" fill="rgba(var(--heat),.14)"/>`:"";
+  const step=Math.ceil(p.length/10);
+  const xl=p.map((a,i)=>i%step?"":`<text x="${X(a[0])}" y="${H-8}" text-anchor="middle">W${a[0]}</text>`).join("");
+  const dots=p.map(a=>`<circle cx="${X(a[0])}" cy="${Y(a[1])}" r="4" fill="var(--accent)" data-tip="${esc(label)} · week ${a[0]}: ${fmt(a[1])}"/>`).join("");
+  const note=p.length===1?`<div class="hint" style="margin-top:4px">Only one epi week is in the data right now. The trend line fills in as new weeks are added to the sheet.</div>`:"";
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Weekly trend of ${esc(label)}">${g}${area}<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.4"/>${dots}${xl}</svg>${note}`;
+}
+
+/* ---------------- completeness & timeliness explorer ---------------- */
+let pxLevel="Sub-city",pxSort="t",pxDir=1,pxList=[];
+const isHosp=r=>num(r.No_of_Gov_Hosps_expected_by_RHB)>0;
+const cl=v=>v>=95?"var(--good)":v>=80?"var(--warn)":"var(--bad)";
+function pxBuild(rows){
+  let g={};
+  const src=pxLevel==="Hospitals"?rows.filter(isHosp):pxLevel==="Woreda"?rows.filter(r=>r._zone!==OTHER_ZONE):rows;
+  src.forEach(r=>{
+    const k=pxLevel==="Sub-city"?r._zone:pxLevel==="Woreda"?r.Woreda:r.Health_Facility+"|"+r.Woreda;
+    const o=g[k]||(g[k]={name:pxLevel==="Hospitals"?r.Health_Facility:(pxLevel==="Woreda"?r.Woreda:r._zone),z:r._zone,w:r.Woreda,n:0,e:0,p:0,o:0,d:0});
+    o.n++;o.e+=num(r.All_Total_sites_Expected_by_RHB);o.p+=num(r.All_Total_sites_Reported);o.o+=num(r.All_Total_sites_Reported_Ontime);if(isDone(r._status))o.d++;
+  });
+  return Object.values(g).map(o=>({...o,c:pct(o.p,o.e),t:pct(o.o,o.e),s:pct(o.d,o.n)}));
+}
+function pxCell(v){return `<td data-tip="${v}%"><span class="pbar"><i style="width:${Math.min(100,v)}%;background:${cl(v)}"></i></span><b style="color:${cl(v)}">${v}%</b></td>`}
+function renderPerfX(rows){
+  $("pxTabs").innerHTML=["Sub-city","Woreda","Hospitals"].map(n=>`<button class="${n===pxLevel?"on":""}" data-k="${n}">${n==="Hospitals"?"Public/Government hospitals":n}</button>`).join("");
+  $("pxTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{pxLevel=b.dataset.k;renderPerfX(sel())});
+  const all=pxBuild(rows);
+  const E=all.reduce((s,o)=>s+o.e,0),P=all.reduce((s,o)=>s+o.p,0),O=all.reduce((s,o)=>s+o.o,0),N=all.reduce((s,o)=>s+o.n,0),Dn=all.reduce((s,o)=>s+o.d,0);
+  const full=all.filter(o=>o.c>=100&&o.t>=100&&o.s>=100).length;
+  $("pxSum").innerHTML=`<span><b>${fmt(all.length)}</b> ${pxLevel==="Sub-city"?"sub-cities":pxLevel==="Woreda"?"woredas":"public/government hospitals"}</span><span>Completeness <b style="color:${cl(pct(P,E))}">${pct(P,E)}%</b></span><span>Timeliness <b style="color:${cl(pct(O,E))}">${pct(O,E)}%</b></span><span>Status completed <b style="color:${cl(pct(Dn,N))}">${pct(Dn,N)}%</b></span><span><b>${fmt(full)}</b> of ${fmt(all.length)} at 100% on all three</span>`;
+  const only=$("pxOnly").checked;
+  pxList=all.filter(o=>!only||o.c<100||o.t<100||o.s<100);
+  const strKeys=["name","z","w"];
+  pxList.sort((a,b)=>{const x=strKeys.includes(pxSort)?String(a[pxSort]).localeCompare(String(b[pxSort])):a[pxSort]-b[pxSort];return (x||a.name.localeCompare(b.name))*pxDir});
+  const cols=[[pxLevel==="Hospitals"?"Hospital":pxLevel==="Woreda"?"Woreda":"Sub-city / group","name",1],...(pxLevel==="Woreda"?[["Sub-city","z",1]]:[]),["Reports","n"],["Expected","e"],["Reported","p"],["On time","o"],["Completeness","c"],["Timeliness","t"],["Status completed","s"]];
+  $("px").innerHTML=`<thead><tr>${cols.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[1]}">${c[0]}${pxSort===c[1]?(pxDir>0?" ▴":" ▾"):""}</th>`).join("")}</tr></thead><tbody>`+
+    (pxList.length?pxList.map(o=>`<tr>${cols.map(c=>c[1]==="c"||c[1]==="t"||c[1]==="s"?pxCell(o[c[1]]):c[2]?`<td class="l">${esc(o[c[1]])}</td>`:`<td>${fmt(o[c[1]])}</td>`).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${cols.length}"><div class="empty">${only?"Everything is at 100%.":pxLevel==="Hospitals"&&F.zone&&F.zone!==OTHER_ZONE?"Public/Government hospitals are not listed under a sub-city. Set the sub-city filter to All.":"No data for this selection"}</div></td></tr>`)+"</tbody>";
+  $("px").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;pxDir=pxSort===k?-pxDir:1;pxSort=k;renderPerfX(sel())});
+}
+$("pxOnly").onchange=()=>renderPerfX(sel());
+$("pxExport").onclick=()=>{
+  const head=["Level","Name","Sub-city","Woreda","Reports","Expected","Reported","On time","Completeness %","Timeliness %","Status completed %"];
+  const L=[head.join(",")].concat(pxList.map(o=>[pxLevel,o.name,o.z,o.w,o.n,o.e,o.p,o.o,o.c,o.t,o.s].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([L.join("\n")],{type:"text/csv"}));a.download=`idsr_${pxLevel.toLowerCase()}_performance.csv`;a.click();
+};
+
+/* ---------------- facility table ---------------- */
+const COLS=[["Sub-city","_zone",1],["Woreda","Woreda",1],["Facility","Health_Facility",1],["Malaria","Total_Malaria_Confirmed_and_Clinical"],["Hypert.","Hypertention_new_Total_Cases"],["Diabetes","Diabetic_Mellitus_new_Total_Cases"],["Pneum. U5","Sever_pneumonia_in_children_U5_Total_Cases"],["Total cases","_tot"],["Deaths","_death"],["Status","_status",1],["Timely %","Timeliness"],["Submitted","_at",1],["By","Completed by:",1]];
+let tblRows=[];
+function renderTable(rows){
+  const q=$("q").value.trim().toLowerCase(),only=$("onlyCases").checked;
+  tblRows=rows.filter(r=>(!q||[r._zone,r.Woreda,r.Health_Facility,r["Completed by:"]].join(" ").toLowerCase().includes(q))&&(!only||r._watch>0))
+    .sort((a,b)=>{const x=COLS.find(c=>c[1]===sortKey)?.[2]?String(a[sortKey]).localeCompare(String(b[sortKey])):num(a[sortKey])-num(b[sortKey]);return x*sortDir});
+  const per=25,pages=Math.max(1,Math.ceil(tblRows.length/per));page=Math.min(page,pages-1);
+  $("tbl").innerHTML=`<thead><tr>${COLS.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[1]}">${c[0]}${sortKey===c[1]?(sortDir<0?" ▾":" ▴"):""}</th>`).join("")}</tr></thead><tbody>`+
+    tblRows.slice(page*per,page*per+per).map(r=>`<tr>${COLS.map(c=>`<td class="${c[2]?"l":""}">${c[2]?esc(r[c[1]]):fmt(num(r[c[1]]))}</td>`).join("")}</tr>`).join("")+"</tbody>";
+  $("tbl").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortKey===k?-sortDir:-1;sortKey=k;renderTable(sel())});
+  $("pinfo").textContent=`${fmt(tblRows.length)} rows · page ${page+1} of ${pages}`;
+}
+$("q").oninput=()=>{page=0;renderTable(sel())};$("onlyCases").onchange=()=>{page=0;renderTable(sel())};
+$("prev").onclick=()=>{page=Math.max(0,page-1);renderTable(sel())};$("next").onclick=()=>{page++;renderTable(sel())};
+$("export").onclick=()=>{
+  const head=COLS.map(c=>c[0]);const lines=[head.join(",")].concat(tblRows.map(r=>COLS.map(c=>`"${String(r[c[1]]??"").replace(/"/g,'""')}"`).join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/csv"}));a.download=`idsr_${F.year}_w${F.week||"all"}.csv`;a.click();
+};
+
+/* ---------------- boot ---------------- */
+$("refresh").onclick=()=>load().catch(showErr);
+$("theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark"};
+function showErr(e){$("error").innerHTML='<div class="err">'+esc(e.message)+(location.protocol==="file:"?" You opened index.html from disk, so the browser blocks the data. Use a local server (python3 -m http.server) or open the GitHub Pages link.":"")+'</div>';$("srcText").textContent="No data";$("srcBadge").className="badge warn";$("subtitle").textContent="No data loaded"}
+(function brand(){
+  const c=window.IDSR_CONFIG||{};
+  if(c.TITLE){$("title").textContent=c.TITLE;document.title=c.TITLE}
+  const by="Designed by: "+(c.DESIGNED_BY||"AARDMC");$("by").textContent=by;$("foot").textContent=by;
+  const img=$("logo"),fb=$("logoFb");
+  img.onerror=()=>{img.style.display="none";fb.style.display="flex"};
+  img.src=c.LOGO||"assets/logo.png";
+  const nav=$("nav");const f=()=>nav.classList.toggle("sm",scrollY>40);addEventListener("scroll",f,{passive:true});f();
+})();
+load().catch(showErr);
+const mins=(window.IDSR_CONFIG||{}).REFRESH_MINUTES;if(mins>0)setInterval(()=>load().catch(()=>{}),mins*60000);
+</script>
+</body>
+</html>
