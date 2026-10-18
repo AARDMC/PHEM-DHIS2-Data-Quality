@@ -421,7 +421,7 @@ function matchZone(raw){
   if(ZMAP[n])return ZMAP[n];
   const stripped=n.replace(/(subcity|subcityadmin|sub|zone|city|woreda|admin)$/,"");
   if(ZMAP[stripped])return ZMAP[stripped];
-  const hit=SUBCITIES.find(z=>{const zn=nrm(z);return zn===stripped||zn.startsWith(stripped)||stripped.startsWith(zn)});
+  const hit=SUBCITIES.find(z=>{const zn=nrm(z);return zn===stripped||(stripped.length>=4&&zn.startsWith(stripped))});
   return hit||null;
 }
 
