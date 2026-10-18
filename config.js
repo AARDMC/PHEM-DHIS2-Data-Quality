@@ -6,7 +6,7 @@
 //  The tab is picked by the gid=... number in the link (gid=0 is the first tab).
 // ------------------------------------------------------------------
 window.IDSR_CONFIG = {
-  SHEET_URL: "https://docs.google.com/spreadsheets/d/1eT2O1CfgdhkMqxnxoFKYxoyHG8WulCuJIVXL6qI12-o/edit?gid=0#gid=0",
+  SHEET_URL: "https://docs.google.com/spreadsheets/d/1BTi1SYNNyz55z_-OjW47iQEcUoKmhWAolz4D5Pk2QmA/edit?gid=0#gid=0",
   FALLBACK_CSV: "",                        // optional backup file path; leave empty for live data only
   REFRESH_MINUTES: 5,                      // auto-refresh interval (0 = off)
   TITLE: "Addis Ababa City PHEM DHIS2 Data Quality Monitoring Dashboard",
