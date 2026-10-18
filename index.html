@@ -23,7 +23,53 @@
   --heat:60,192,208;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- sign-in page ---------- */
+.login{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;overflow:auto;
+  background:linear-gradient(120deg,#1e1b4b 0%,#4c1d95 45%,#0e7490 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;pointer-events:none;animation:drift 26s ease-in-out infinite alternate}
+.blob.b1{width:46vmax;height:46vmax;left:-14vmax;top:-16vmax;background:#f59e0b;opacity:.28}
+.blob.b2{width:40vmax;height:40vmax;right:-12vmax;top:18vh;background:#ec4899;opacity:.30;animation-delay:-9s}
+.blob.b3{width:44vmax;height:44vmax;left:22vw;bottom:-24vmax;background:#22d3ee;opacity:.32;animation-delay:-17s}
+@keyframes drift{to{transform:translate3d(6vmax,4vmax,0) scale(1.12)}}
+.lgcard{position:relative;width:min(430px,100%);background:var(--card);color:var(--ink);border-radius:22px;padding:30px 30px 22px;
+  box-shadow:0 30px 80px rgba(15,10,50,.5),0 0 0 1px rgba(255,255,255,.12);overflow:hidden}
+.lgcard .pulse{position:absolute;left:0;top:0;width:100%;height:92px;pointer-events:none}
+.lgcard .pulse path{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.5;
+  stroke-dasharray:900;stroke-dashoffset:900;animation:ecg 2.4s .2s ease-out forwards}
+@keyframes ecg{to{stroke-dashoffset:0}}
+.lgbrand{position:relative;display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.lgbrand .logo{width:56px;height:56px;border-radius:14px;object-fit:contain;background:#fff;padding:5px;box-shadow:0 2px 10px rgba(30,27,75,.18)}
+.lgbrand .logo.fb{display:none;align-items:center;justify-content:center;font-weight:800;font-size:19px;color:#4c1d95;background:#ede9fe}
+.lgcard h1{position:relative;margin:0 0 4px;font-size:22px;line-height:1.2;letter-spacing:-.02em;font-weight:750}
+.lgsub{margin:0 0 20px;color:var(--muted);font-size:13.5px}
+.lgcard label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
+.lgfield{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:12px;padding:0 6px 0 12px;background:var(--bg);transition:border-color .15s,box-shadow .15s}
+.lgfield:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.lgfield svg{flex:none;color:var(--muted)}
+.lgfield input{flex:1;min-width:0;border:0;background:transparent;padding:13px 4px;font-size:16px;letter-spacing:.04em;outline:none}
+.lgfield button{border:0;background:transparent;padding:8px;border-radius:8px;color:var(--muted);display:grid;place-items:center}
+.lgfield button:hover{color:var(--ink);background:var(--line)}
+.lgerr{min-height:20px;margin:8px 0 10px;color:var(--bad);font-size:13px}
+.lgbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:650;color:#fff;cursor:pointer;
+  background:linear-gradient(110deg,#4c1d95,#0e7490);box-shadow:0 8px 22px rgba(76,29,149,.35);transition:transform .12s,box-shadow .12s,opacity .12s}
+.lgbtn:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(76,29,149,.42)}
+.lgbtn:disabled{opacity:.7;cursor:progress;transform:none}
+.lgbtn .sp{display:none;width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite}
+.lgbtn.busy .sp{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lgnote{margin:16px 0 0;color:var(--muted);font-size:12.5px;line-height:1.5}
+.lgfoot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:12px}
+@media (prefers-reduced-motion:reduce){
+  .blob{animation:none}
+  .lgcard .pulse path{animation:none;stroke-dashoffset:0}
+  .lgbtn{transition:none}
+}
+
+/* ---------- dashboard ---------- */
 .nav{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:12px 22px;color:#fff;
   background:linear-gradient(110deg,#1e1b4b 0%,#4c1d95 42%,#0e7490 100%);border-bottom:3px solid transparent;border-image:linear-gradient(90deg,#f59e0b,#ec4899,#22d3ee) 1;
   box-shadow:0 6px 22px rgba(30,27,75,.35);transition:padding .2s ease}
@@ -47,8 +93,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:6px 0 28px}
 .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
 button,select,input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 button{cursor:pointer}button:hover{border-color:var(--accent)}
-.filters{display:flex;flex-wrap:wrap;gap:10px;padding:6px 20px 14px;align-items:end}
+.filters{display:flex;flex-wrap:wrap;gap:10px;padding:6px 20px 10px;align-items:end}
 .filters label{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);gap:3px}
+.filters input[list]{min-width:210px}
+.filters input.bad{border-color:var(--bad)}
+.filters select:disabled{opacity:.75;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 12px;align-items:center;font-size:12px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 6px 3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px}
+.chip button{border:0;background:transparent;color:inherit;padding:0 4px;border-radius:50%;line-height:1;font-size:14px}
+.chip button:hover{background:rgba(0,0,0,.12)}
+.chip.lock{padding-right:10px;background:var(--line);color:var(--muted)}
 main{padding:0 20px 40px;max-width:1500px;margin:0 auto}
 .kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;margin-bottom:14px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
@@ -56,6 +110,7 @@ main{padding:0 20px 40px;max-width:1500px;margin:0 auto}
 .kpi .v{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
 .kpi .s{font-size:11.5px;color:var(--muted)}
 .kpi.alert .v{color:var(--bad)}
+.kpi.pick{border-color:var(--accent);background:var(--accent-soft)}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
 .card h2{font-size:14px;margin:0 0 2px;font-weight:650}
@@ -63,37 +118,77 @@ main{padding:0 20px 40px;max-width:1500px;margin:0 auto}
 .c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
 @media(max-width:1000px){.c4,.c5,.c6,.c7,.c8{grid-column:span 12}}
 .bars{display:flex;flex-direction:column;gap:6px}
-.bar{display:grid;grid-template-columns:minmax(90px,36%) 1fr 56px;gap:8px;align-items:center;font-size:12.5px}
+.bar{display:grid;grid-template-columns:minmax(90px,36%) 1fr 56px;gap:8px;align-items:center;font-size:12.5px;border-radius:6px;padding:1px 4px}
 .bar .n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar .t{height:12px;background:var(--line);border-radius:6px;overflow:hidden}
 .bar .t i{display:block;height:100%;background:var(--accent);border-radius:6px}
 .bar .x{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.bar.clk{cursor:pointer}.bar.clk:hover{background:var(--accent-soft)}
+.bar.on{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.bar.tot{border-top:2px solid var(--line);margin-top:4px;padding-top:6px;font-weight:700;border-radius:0}
+.bar.tot .t{background:transparent}
 table{border-collapse:collapse;width:100%;font-size:12.5px}
 th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 th:first-child,td:first-child,td.l,th.l{text-align:left}
-th{color:var(--muted);font-weight:600;font-size:11.5px;cursor:pointer;position:sticky;top:0;background:var(--card)}
+th{color:var(--muted);font-weight:600;font-size:11.5px;cursor:pointer;position:sticky;top:0;background:var(--card);z-index:1}
+tfoot td{position:sticky;bottom:0;background:var(--card);border-top:2px solid var(--line);border-bottom:0;font-weight:700;font-variant-numeric:tabular-nums}
+tr.clk{cursor:pointer}tr.clk:hover td{background:var(--accent-soft)}
+td.clk{cursor:pointer;color:var(--accent)}td.clk:hover{text-decoration:underline}
 .scroll{overflow:auto;max-height:420px}
 .pbar{display:inline-block;width:56px;height:6px;background:var(--line);border-radius:4px;margin-right:6px;vertical-align:middle;overflow:hidden}
 .pbar i{display:block;height:100%}
 .sum{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 8px;font-size:12.5px;color:var(--muted)}
 .sum b{color:var(--ink);font-size:15px}
 .heat td.h{font-variant-numeric:tabular-nums}
+td.h.clk{color:inherit}td.h.clk:hover{text-decoration:none;outline:2px solid var(--accent);outline-offset:-2px}
 .watch{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.w{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.w{border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}
+.w:hover{border-color:var(--accent)}
 .w b{font-size:18px;display:block}
 .w.on{border-color:var(--bad);background:var(--warn-soft)}
 .w.on b{color:var(--bad)}
+.w.sel{box-shadow:0 0 0 2px var(--accent)}
 .w span{font-size:11.5px;color:var(--muted)}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .pager{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--muted)}
-#tip{position:fixed;pointer-events:none;background:#0b1620;color:#fff;font-size:12px;padding:5px 9px;border-radius:7px;display:none;z-index:9;max-width:260px}
+#tip{position:fixed;pointer-events:none;background:#0b1620;color:#fff;font-size:12px;padding:5px 9px;border-radius:7px;display:none;z-index:120;max-width:260px}
 .empty{color:var(--muted);padding:18px 0;text-align:center}
-svg text{fill:var(--muted);font-size:11px}
 .err{background:var(--warn-soft);color:var(--warn);padding:10px 14px;border-radius:10px;margin:0 20px 12px}
+.row-tools{display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.row-tools label{display:flex;gap:6px;align-items:center;color:var(--muted)}
 </style>
 </head>
 <body>
+
+<!-- ============ SIGN-IN ============ -->
+<div class="login" id="login">
+  <i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i>
+  <form class="lgcard" id="lgForm" autocomplete="off" novalidate>
+    <svg class="pulse" viewBox="0 0 430 92" preserveAspectRatio="none" aria-hidden="true"><path d="M0 46 H120 L138 46 L150 18 L166 76 L180 30 L192 46 H250 L262 46 L274 34 L286 58 L296 46 H430"/></svg>
+    <div class="lgbrand">
+      <img id="lgLogo" class="logo" alt="AARDMC logo">
+      <span id="lgLogoFb" class="logo fb">AA</span>
+    </div>
+    <h1 id="lgTitle">Addis Ababa City PHEM</h1>
+    <p class="lgsub">DHIS2 Data Quality Monitoring Dashboard. Sign in with your sub-city ID.</p>
+    <label for="lgId">Sub-city ID</label>
+    <div class="lgfield">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3m-4 4 3 3m-5-1 2 2"/></svg>
+      <input id="lgId" name="subcity-id" type="password" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter your ID" aria-describedby="lgErr">
+      <button type="button" id="lgEye" aria-label="Show ID" title="Show ID">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="lgerr" id="lgErr" role="alert" aria-live="polite"></div>
+    <button class="lgbtn" id="lgBtn" type="submit"><span class="sp"></span><span id="lgBtnT">Sign in</span></button>
+    <p class="lgnote">Each sub-city sees only its own facility reports. Addis Ababa PHEM sees every sub-city.</p>
+    <div class="lgfoot" id="lgBy">Designed by: AARDMC</div>
+  </form>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="app" hidden>
 <header class="nav" id="nav">
   <div class="brand">
     <img id="logo" class="logo" alt="AARDMC logo">
@@ -104,9 +199,11 @@ svg text{fill:var(--muted);font-size:11px}
     </div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="badge" id="who" title="Signed in"></span>
     <span class="badge" id="srcBadge"><i class="dot"></i><span id="srcText">…</span></span>
     <button id="refresh" title="Reload data">↻ Refresh</button>
     <button id="theme" title="Toggle light/dark">◐</button>
+    <button id="logout" title="Sign out">Sign out</button>
   </div>
 </header>
 <div class="ctx" id="subtitle">Loading…</div>
@@ -116,90 +213,106 @@ svg text{fill:var(--muted);font-size:11px}
   <label>Epi week<select id="fWeek"></select></label>
   <label>Sub-city / zone<select id="fZone"></select></label>
   <label>Woreda<select id="fWoreda"></select></label>
+  <label>Disease type<input id="fDisease" list="dlDisease" placeholder="Type to search disease…" autocomplete="off"></label>
+  <label>Health facility name<input id="fFac" list="dlFac" placeholder="Type to search facility…" autocomplete="off"></label>
   <label>Report status<select id="fStatus"></select></label>
   <button id="reset">Reset filters</button>
 </div>
+<datalist id="dlDisease"></datalist>
+<datalist id="dlFac"></datalist>
+<div class="chips" id="chips"></div>
 <main>
   <section class="kpis" id="kpis"></section>
   <section class="grid">
     <div class="card c7">
       <h2>Disease burden</h2>
-      <div class="hint" id="burdenHint">Total reported cases for the selection</div>
+      <div class="hint" id="burdenHint">Total reported cases for the selection. Click a disease to filter everything.</div>
       <div class="bars" id="burden"></div>
     </div>
     <div class="card c5">
       <h2>Epidemic-prone &amp; priority watchlist</h2>
-      <div class="hint">Highlighted when ≥1 case/death reported in the selection</div>
+      <div class="hint">Highlighted when ≥1 case/death reported in the selection. Click a tile to filter by that disease.</div>
       <div class="watch" id="watch"></div>
     </div>
 
     <div class="card c12">
-      <h2>Sub-city heatmap</h2>
-      <div class="hint">Cases by sub-city and disease. Darker = higher relative to the column maximum.</div>
+      <h2 id="dflTitle">Cases by disease and health facility</h2>
+      <div class="hint" id="dflHint"></div>
+      <div class="row-tools"><button id="dflExport">⬇ Export CSV</button></div>
+      <div class="scroll" style="max-height:460px"><table id="dfl"></table></div>
+      <div class="pager"><span id="dflInfo"></span><span><button id="dflPrev">‹ Prev</button> <button id="dflNext">Next ›</button></span></div>
+    </div>
+
+    <div class="card c12">
+      <h2 id="heatTitle">Sub-city heatmap</h2>
+      <div class="hint" id="heatHint">Darker = higher relative to the column maximum. Click a name to filter, or a cell to filter by that disease and area.</div>
       <div class="scroll"><table class="heat" id="heat"></table></div>
     </div>
 
     <div class="card c12">
       <h2>Completeness &amp; timeliness explorer</h2>
-      <div class="hint">Completeness = reported ÷ expected · Timeliness = on time ÷ expected · Public/Government hospitals = facilities expected as government hospitals (No_of_Gov_Hosps_expected_by_RHB); they report directly, not under a sub-city. Click a column to sort.</div>
+      <div class="hint">Completeness = reported ÷ expected · Timeliness = on time ÷ expected · Public/Government hospitals = facilities expected as government hospitals (No_of_Gov_Hosps_expected_by_RHB); they report directly, not under a sub-city. Click a column to sort, a row to filter.</div>
       <div class="tabs" id="pxTabs"></div>
       <div class="sum" id="pxSum"></div>
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
-        <label style="display:flex;gap:6px;align-items:center;color:var(--muted)"><input type="checkbox" id="pxOnly"> Only units below 100% (completeness, timeliness or status)</label>
+      <div class="row-tools">
+        <label><input type="checkbox" id="pxOnly"> Only units below 100% (completeness, timeliness or status)</label>
         <button id="pxExport">⬇ Export CSV</button>
       </div>
       <div class="scroll" style="max-height:480px"><table id="px"></table></div>
     </div>
 
     <div class="card c6">
-      <h2>Trend by epi week</h2>
-      <div class="tabs" id="trendTabs"></div>
-      <div id="trend"></div>
+      <h2 id="areasTitle">Top areas</h2>
+      <div class="tabs" id="areaTabs"></div>
+      <div class="hint" id="areasHint"></div>
+      <div class="bars" id="areas"></div>
     </div>
     <div class="card c6">
-      <h2>Top areas</h2>
-      <div class="tabs" id="areaTabs"></div>
-      <div class="bars" id="areas"></div>
+      <h2>Completeness status</h2>
+      <div class="hint">Status recorded on each facility report. Click to filter.</div>
+      <div class="bars" id="byStatus"></div>
+      <h2 style="margin-top:14px">Reports submitted by day</h2>
+      <div class="hint">From the “at:” field. Click a day to filter.</div>
+      <div class="bars" id="byDay"></div>
     </div>
 
     <div class="card c6">
-      <h2>Reporting performance by sub-city</h2>
-      <div class="hint">Completeness = reported ÷ expected sites · Timeliness = on-time ÷ expected</div>
+      <h2 id="perfTitle">Reporting performance by sub-city</h2>
+      <div class="hint">Completeness = reported ÷ expected sites · Timeliness = on-time ÷ expected. Click a row to filter.</div>
       <div class="scroll"><table id="perf"></table></div>
     </div>
     <div class="card c6">
       <h2>Reporting by facility type</h2>
       <div class="hint">Expected vs reported vs on-time</div>
       <div class="scroll"><table id="ftype"></table></div>
-      <h2 style="margin-top:14px">Completeness status</h2>
-      <div class="hint">Status recorded on each facility report</div>
-      <div class="bars" id="byStatus"></div>
-      <h2 style="margin-top:14px">Reports submitted by day</h2>
-      <div class="bars" id="byDay"></div>
     </div>
 
     <div class="card c12">
       <h2>Facility reports</h2>
-      <div class="hint">Search, sort and export the facility-level rows for the current selection</div>
-      <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-        <input id="q" placeholder="Search facility, woreda, reporter…" style="min-width:260px">
-        <label style="display:flex;gap:6px;align-items:center;color:var(--muted)"><input type="checkbox" id="onlyCases"> Only facilities with a reportable case/death</label>
+      <div class="hint">Search, sort and export the facility-level rows for the current selection. Click a facility name to filter.</div>
+      <div class="row-tools">
+        <input id="q" placeholder="Search reporter, woreda, facility…" style="min-width:260px">
+        <label><input type="checkbox" id="onlyCases"> Only facilities with a reportable case/death</label>
         <button id="export">⬇ Export CSV</button>
       </div>
       <div class="scroll" style="max-height:520px"><table id="tbl"></table></div>
       <div class="pager"><span id="pinfo"></span><span><button id="prev">‹ Prev</button> <button id="next">Next ›</button></span></div>
     </div>
   </section>
-  <footer id="foot">Designed by: AARDMC</footer>
+  <footer><div id="foot">Designed by: AARDMC</div><div id="chk"></div></footer>
 </main>
+</div>
 <div id="tip"></div>
 <script src="config.js"></script>
 <script>
 "use strict";
+const CFG=window.IDSR_CONFIG||{};
+const $=id=>document.getElementById(id);
+
 /* ---------------- configuration of indicators ---------------- */
 const SUBCITIES=["Addis Ketema","Akaki Kality","Arada","Bole","Gulele","Kirkos","Kolfe Keranyo","Lideta","Lemi Kura","Nifas Silk Lafto","Yeka"];
 const OTHER_ZONE="Public/Government Hospitals";
-const D=[ // label, cases column, deaths column, key
+const D=[ // label, cases column, deaths column
  ["Hypertension (new)","Hypertention_new_Total_Cases","Hypertention_new_InP_Deaths"],
  ["Malaria (confirmed + clinical)","Total_Malaria_Confirmed_and_Clinical","TMalaria_InP_Deaths"],
  ["Severe pneumonia U5","Sever_pneumonia_in_children_U5_Total_Cases","Sever_pneumonia_in_children_U5_InP_Deaths"],
@@ -242,11 +355,22 @@ const D=[ // label, cases column, deaths column, key
 const WATCH=["AFP / Polio","Anthrax","Cholera","Measles","Meningitis","Neonatal tetanus","Novel influenza subtype","Human rabies","Dengue fever","SARS","Smallpox","Viral hemorrhagic fever","Yellow fever","Rift Valley fever","Mpox","COVID-19","Chikungunya","Chemical poisoning","Relapsing fever","Dysentery","Diarrhea w/ dehydration U5","SAM children U5","Acute jaundice syndrome"];
 const DEATH_ONLY=[["Maternal deaths","Maternal_death"],["Perinatal deaths","Perinatal_death"]];
 const FTYPES=[["Government health posts","Gov_HPs"],["Government health centers","Gov_HCs"],["Government hospitals","Gov_Hosps"],["NGO facilities","NGOHF"],["Other facilities","OtherHFs"]];
+/* every selectable disease: c = cases column (null for death-only items), d = deaths column */
+const DX=D.map(d=>({n:d[0],c:d[1],d:d[2]})).concat(DEATH_ONLY.map(d=>({n:d[0],c:null,d:d[1]})));
+const DXBY=Object.fromEntries(DX.map(x=>[x.n,x]));
+
 const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
 const fmt=n=>Math.round(n).toLocaleString("en-US");
 const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const $=id=>document.getElementById(id);
+const nrm=s=>String(s??"").toLowerCase().replace(/[^a-z0-9]/g,"");
+const ZMAP=Object.fromEntries(SUBCITIES.map(z=>[nrm(z),z]));
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmtDate=iso=>{const m=String(iso).match(/^(\d{4})-(\d\d)-(\d\d)$/);return m?`${+m[3]} ${MON[+m[2]-1]} ${m[1]}`:iso};
+const fmtDay=iso=>new Date(iso+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+const dxMain=(r,x)=>x.c?num(r[x.c]):num(r[x.d]);         // cases (or deaths for death-only items)
+const dxDeaths=(r,x)=>x.c&&x.d?num(r[x.d]):0;
+const dxHas=(r,x)=>(x.c?num(r[x.c]):0)+(x.d?num(r[x.d]):0)>0;
 
 /* ---------------- CSV loading ---------------- */
 function parseCSV(text){
@@ -262,54 +386,154 @@ function parseCSV(text){
   if(cur!==""||row.length){row.push(cur);rows.push(row)}
   return rows;
 }
+let ATKEY="";
 function toObjects(rows){
   const head=rows[0].map(h=>h.trim());
+  ATKEY=head.find(h=>nrm(h)==="at")||head.find(h=>/^at\b/i.test(h))||"";
   return rows.slice(1).map(r=>{const o={};head.forEach((h,i)=>o[h]=(r[i]??"").trim());return o})
     .filter(o=>o.Health_Facility||o.Woreda); // drop blank/footer rows
 }
+/* the "at:" field: ISO (2026-10-13 09:41:22), d/m/yyyy hh:mm, m/d/yyyy hh:mm AM, Date(y,m,d,h,mi) or an Excel serial */
+function parseAt(raw){
+  const s=String(raw??"").trim();if(!s)return null;
+  const p2=n=>String(n).padStart(2,"0");
+  let y,mo,d,h=0,mi=0,hasT=false,m;
+  if((m=s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})(?:,(\d{1,2}),(\d{1,2}))?/))){y=+m[1];mo=+m[2]+1;d=+m[3];if(m[4]!=null){h=+m[4];mi=+m[5];hasT=true}}
+  else if((m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s]+(\d{1,2}):(\d{2}))?/))){y=+m[1];mo=+m[2];d=+m[3];if(m[4]!=null){h=+m[4];mi=+m[5];hasT=true}}
+  else if((m=s.match(/(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:[,\sT]+(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?)?/))){
+    const a=+m[1],b=+m[2];y=+m[3];
+    if(a>12){d=a;mo=b}else if(b>12){mo=a;d=b}else{d=a;mo=b}
+    if(m[4]!=null){h=+m[4];mi=+m[5];hasT=true;const ap=(m[6]||"").toLowerCase();if(ap==="pm"&&h<12)h+=12;if(ap==="am"&&h===12)h=0}
+  }
+  else if(/^\d{5}(\.\d+)?$/.test(s)){const dt=new Date(Math.round((+s-25569)*864e5));y=dt.getUTCFullYear();mo=dt.getUTCMonth()+1;d=dt.getUTCDate();h=dt.getUTCHours();mi=dt.getUTCMinutes();hasT=s.includes(".")}
+  else return null;
+  if(!(mo>=1&&mo<=12&&d>=1&&d<=31))return null;
+  return{date:`${y}-${p2(mo)}-${p2(d)}`,time:hasT?`${p2(h)}:${p2(mi)}`:"",ts:Date.UTC(y,mo-1,d,h,mi)};
+}
 function prep(o){
-  o._zone=SUBCITIES.includes(o.Zone)?o.Zone:(num(o.No_of_Gov_Hosps_expected_by_RHB)>0?OTHER_ZONE:(o.Zone||"Unassigned"));
+  const z=ZMAP[nrm(o.Zone)];
+  o._zone=z||(num(o.No_of_Gov_Hosps_expected_by_RHB)>0?OTHER_ZONE:(o.Zone||"Unassigned"));
   o._status=(o["Completeness Status"]||"").trim()||"Not set";
   o._year=num(o.Year);o._week=num(o.Epi_Week);
   o._tot=D.reduce((s,d)=>s+num(o[d[1]]),0);
   o._death=D.reduce((s,d)=>s+(d[2]?num(o[d[2]]):0),0)+DEATH_ONLY.reduce((s,d)=>s+num(o[d[1]]),0);
-  const m=(o["at:"]||"").match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  o._at=m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:"";
+  const raw=ATKEY?o[ATKEY]:"",a=parseAt(raw);
+  o._atRaw=raw;o._atDate=a?a.date:"";o._atTime=a?a.time:"";o._ts=a?a.ts:0;
+  o._at=a?(a.time?`${fmtDate(a.date)}, ${a.time}`:fmtDate(a.date)):(raw||"");
   o._watch=WATCH.reduce((s,k)=>{const d=D.find(x=>x[0]===k);return s+num(o[d[1]])+(d[2]?num(o[d[2]]):0)},0)+num(o.Maternal_death);
   return o;
 }
 async function fetchText(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.text()}
-let DATA=[],SOURCE="",LOADED=null;
+const sheetId=u=>(String(u||"").match(/\/spreadsheets\/d\/([\w-]+)/)||[])[1]||"";
+const gidOf=u=>(String(u||"").match(/[?#&]gid=(\d+)/)||[])[1];
 function csvUrl(u){
   if(!u)return "";
   if(/\/spreadsheets\/d\/e\//.test(u)||/output=csv|tqx=out:csv|format=csv/.test(u))return u;
-  const m=u.match(/\/spreadsheets\/d\/([\w-]+)/);if(!m)return u;
-  const g=(u.match(/[?#&]gid=(\d+)/)||[])[1]||"0";
-  return `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv&gid=${g}&headers=1`;
+  const id=sheetId(u);if(!id)return u;
+  return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${gidOf(u)||"0"}&headers=1`;
 }
+const exportUrl=u=>{const id=sheetId(u);return id?`https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gidOf(u)||"0"}`:""};
+
+let USER=null,DATA=[],SOURCE="",LOADED=null,FACSET=new Set();
+const atBlank=rows=>rows.filter(r=>!r._atRaw).length/Math.max(1,rows.length);
 async function load(){
-  const cfg=window.IDSR_CONFIG||{};
-  const sheet=csvUrl(new URLSearchParams(location.search).get("sheet")||cfg.SHEET_URL||cfg.SHEET_CSV_URL||"");
+  if(!USER)return;
+  const sheetSrc=new URLSearchParams(location.search).get("sheet")||CFG.SHEET_URL||CFG.SHEET_CSV_URL||"";
+  const sheet=csvUrl(sheetSrc);
   $("error").innerHTML="";
   let text=null,why="";
   if(sheet){
     try{text=await fetchText(sheet);if(!text||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="Live Google Sheet"}
     catch(e){text=null;why=e.message}
   }
-  if(!text&&cfg.FALLBACK_CSV){
-    text=await fetchText(cfg.FALLBACK_CSV);SOURCE="Backup CSV (sheet unreachable)";
+  if(!text&&CFG.FALLBACK_CSV){
+    text=await fetchText(CFG.FALLBACK_CSV);SOURCE="Backup CSV (sheet unreachable)";
     if(sheet)$("error").innerHTML='<div class="err">Could not read the Google Sheet ('+esc(why)+'). Showing the backup CSV instead.</div>';
   }
   if(!text)throw new Error(sheet?"Could not read the Google Sheet ("+why+"). Check that it is shared as \u201CAnyone with the link \u2192 Viewer\u201D and that the tab (gid) in config.js is correct.":"No data source set. Add your Google Sheet link as SHEET_URL in config.js.");
-  DATA=toObjects(parseCSV(text)).map(prep);
+  let rows=toObjects(parseCSV(text)).map(prep);
+  /* Google's chart endpoint can blank a column that mixes text and dates. If "at:" came back mostly empty, try the plain CSV export. */
+  if(ATKEY&&rows.length&&atBlank(rows)>.5&&exportUrl(sheetSrc)){
+    try{const t2=await fetchText(exportUrl(sheetSrc));if(t2&&!t2.trim().startsWith("<")){const r2=toObjects(parseCSV(t2)).map(prep);if(r2.length&&atBlank(r2)<atBlank(rows))rows=r2}}catch(e){}
+  }
+  /* each sub-city only ever receives its own rows */
+  if(!USER.admin){const k=nrm(USER.sub);rows=rows.filter(r=>nrm(r._zone)===k||nrm(r.Zone)===k)}
+  DATA=rows;
+  FACSET=new Set(DATA.map(r=>String(r.Health_Facility||"").toLowerCase()));
   LOADED=new Date();
   $("srcText").textContent=SOURCE;
   $("srcBadge").className="badge"+(SOURCE.startsWith("Live")?"":" warn");
+  const withT=DATA.filter(r=>r._atTime).length,withD=DATA.filter(r=>r._atDate).length;
+  $("chk").textContent=ATKEY?`“${ATKEY}” column found · date read for ${fmt(withD)} of ${fmt(DATA.length)} reports, time for ${fmt(withT)}`:"No “at:” column found in the sheet headings";
+  if(!DATA.length&&!USER.admin)$("error").innerHTML='<div class="err">No reports found for '+esc(USER.sub)+'. Check that the Sub_City name in the ID sheet matches the Zone name in the data sheet.</div>';
   initFilters();render();
 }
 
-/* ---------------- filters ---------------- */
-const F={year:"",week:"",zone:"",woreda:"",status:""};
+/* ---------------- sign-in ---------------- */
+const SKEY="phem_session_id";
+const store={get(){try{return sessionStorage.getItem(SKEY)||""}catch(e){return ""}},set(v){try{sessionStorage.setItem(SKEY,v)}catch(e){}},clear(){try{sessionStorage.removeItem(SKEY)}catch(e){}}};
+const idKey=s=>String(s??"").trim().toLowerCase().replace(/^0+(?=\d)/,"");
+function parseCreds(text){
+  const rows=parseCSV(text);if(!rows.length)return[];
+  const wantId=nrm(CFG.ID_HEADING||"ID"),wantSub=nrm(CFG.SUBCITY_HEADING||"Sub_City");
+  let hr=-1,ci=-1,cs=-1;
+  for(let i=0;i<Math.min(rows.length,10)&&hr<0;i++){
+    const h=rows[i].map(nrm),s=h.indexOf(wantSub)>=0?h.indexOf(wantSub):h.findIndex(x=>x.includes("subcity"));
+    const d=h.indexOf(wantId)>=0?h.indexOf(wantId):h.findIndex((x,j)=>j!==s&&/^id|id$/.test(x));
+    if(s>=0&&d>=0){hr=i;ci=d;cs=s}
+  }
+  if(hr<0){if((rows[0]||[]).length<2)return[];hr=0;ci=0;cs=1}
+  return rows.slice(hr+1).map(r=>({id:(r[ci]||"").trim(),sub:(r[cs]||"").trim()})).filter(c=>c.id);
+}
+async function loadCreds(){
+  const id=sheetId(CFG.CREDENTIALS_URL);
+  if(!id)throw new Error("The ID sheet is not set. Add CREDENTIALS_URL to config.js.");
+  const urls=[];const g=gidOf(CFG.CREDENTIALS_URL);
+  if(g)urls.push(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&gid=${g}&headers=1`);
+  if(CFG.CREDENTIALS_TAB)urls.push(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(CFG.CREDENTIALS_TAB)}&headers=1`);
+  let why="";
+  for(const u of urls){
+    try{const t=await fetchText(u);if(!t||t.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");const list=parseCreds(t);if(list.length)return list;why="no rows with an ID and a Sub_City"}
+    catch(e){why=e.message}
+  }
+  throw new Error("Could not read the ID sheet ("+why+"). It must be shared as \u201CAnyone with the link \u2192 Viewer\u201D.");
+}
+function showLogin(msg){
+  USER=null;DATA=[];$("app").hidden=true;$("login").hidden=false;
+  $("lgErr").textContent=msg||"";setBusy(false);$("lgId").value="";
+}
+function setBusy(b,t){$("lgBtn").disabled=b;$("lgBtn").classList.toggle("busy",b);$("lgBtnT").textContent=t||(b?"Checking…":"Sign in")}
+function enter(hit){
+  const admin=nrm(hit.sub)===nrm(CFG.ADMIN_SUBCITY||"Addis Ababa PHEM");
+  USER={id:hit.id,sub:ZMAP[nrm(hit.sub)]||hit.sub,admin};
+  store.set(hit.id);
+  Object.assign(F,{year:"",week:"",zone:"",woreda:"",facility:"",disease:"",status:"",day:"",_weekTouched:false});
+  $("fDisease").value="";$("fFac").value="";
+  $("who").textContent=admin?"Addis Ababa PHEM · all sub-cities":USER.sub;
+  $("who").title="Signed in as "+(admin?"Addis Ababa PHEM":USER.sub);
+  $("login").hidden=true;$("app").hidden=false;scrollTo(0,0);
+  $("subtitle").textContent="Loading…";
+  load().catch(showErr);
+}
+let fails=0,lockUntil=0;
+$("lgEye").onclick=()=>{const i=$("lgId"),show=i.type==="password";i.type=show?"text":"password";$("lgEye").title=$("lgEye").ariaLabel=show?"Hide ID":"Show ID"};
+$("lgForm").onsubmit=async e=>{
+  e.preventDefault();
+  const id=$("lgId").value.trim(),err=$("lgErr");
+  if(Date.now()<lockUntil){err.textContent=`Too many attempts. Try again in ${Math.ceil((lockUntil-Date.now())/1000)} seconds.`;return}
+  if(!id){err.textContent="Enter your sub-city ID.";$("lgId").focus();return}
+  err.textContent="";setBusy(true);
+  try{
+    const hit=(await loadCreds()).find(c=>idKey(c.id)===idKey(id));
+    if(!hit){fails++;if(fails>=5){lockUntil=Date.now()+30000;fails=0;err.textContent="Too many attempts. Try again in 30 seconds."}else err.textContent="That ID was not found. Check it and try again.";setBusy(false);$("lgId").select();return}
+    if(!hit.sub){err.textContent="This ID has no Sub_City assigned. Ask the PHEM team to fix the ID sheet.";setBusy(false);return}
+    fails=0;enter(hit);
+  }catch(ex){err.textContent=ex.message;setBusy(false)}
+};
+$("logout").onclick=()=>{store.clear();showLogin("")};
+
+/* ---------------- filters (cross-filtering) ---------------- */
+const F={year:"",week:"",zone:"",woreda:"",facility:"",disease:"",status:"",day:"",_weekTouched:false};
 const isDone=s=>/^completed?$/i.test(String(s).trim());
 function opts(sel,vals,all,keep){
   const cur=keep??sel.value;
@@ -320,13 +544,16 @@ function initFilters(){
   const years=[...new Set(DATA.map(r=>r._year))].sort((a,b)=>b-a);
   if(!F.year||!years.includes(+F.year))F.year=String(years[0]??"");
   opts($("fYear"),years,"",F.year);
-  fillWeeks();
-  fillZones();
-  fillStatuses();
+  syncControls();
 }
-function fillStatuses(){
+function syncControls(){
+  fillWeeks();fillZones();
   const st=[...new Set(DATA.map(r=>r._status))].sort();
   opts($("fStatus"),st,"All statuses",F.status);F.status=$("fStatus").value;
+  $("fYear").value=F.year;
+  if(document.activeElement!==$("fDisease"))$("fDisease").value=F.disease;
+  if(document.activeElement!==$("fFac"))$("fFac").value=F.facility;
+  $("fDisease").classList.remove("bad");
 }
 function fillWeeks(){
   const wk=[...new Set(DATA.filter(r=>String(r._year)===F.year).map(r=>r._week))].sort((a,b)=>b-a);
@@ -336,24 +563,82 @@ function fillWeeks(){
   s.value=F.week;
 }
 function fillZones(){
-  const zs=[...SUBCITIES.filter(z=>DATA.some(r=>r._zone===z)),...(DATA.some(r=>r._zone===OTHER_ZONE)?[OTHER_ZONE]:[])];
-  opts($("fZone"),zs,"All sub-cities",F.zone);F.zone=$("fZone").value;
+  const present=[...new Set(DATA.map(r=>r._zone))];
+  const zs=[...SUBCITIES.filter(z=>present.includes(z)),...present.filter(z=>!SUBCITIES.includes(z)&&z!==OTHER_ZONE).sort(),...(present.includes(OTHER_ZONE)?[OTHER_ZONE]:[])];
+  if(USER&&!USER.admin){F.zone=zs[0]||"";$("fZone").disabled=true}else $("fZone").disabled=false;
+  opts($("fZone"),zs,USER&&!USER.admin?"":"All sub-cities",F.zone);F.zone=$("fZone").value;
   fillWoredas();
 }
 function fillWoredas(){
   const ws=[...new Set(DATA.filter(r=>!F.zone||r._zone===F.zone).map(r=>r.Woreda).filter(Boolean))].sort();
   opts($("fWoreda"),ws,"All woredas",F.woreda);F.woreda=$("fWoreda").value;
+  fillFacilities();
 }
-$("fYear").onchange=e=>{F.year=e.target.value;F.week="";F._weekTouched=false;fillWeeks();render()};
-$("fWeek").onchange=e=>{F.week=e.target.value;F._weekTouched=true;render()};
-$("fZone").onchange=e=>{F.zone=e.target.value;F.woreda="";fillWoredas();render()};
-$("fWoreda").onchange=e=>{F.woreda=e.target.value;render()};
-$("fStatus").onchange=e=>{F.status=e.target.value;page=0;render()};
-$("reset").onclick=()=>{F.zone="";F.woreda="";F.week="";F.status="";F._weekTouched=false;fillWeeks();fillZones();fillStatuses();render()};
-
+function fillFacilities(){
+  const names=[...new Set(base().map(r=>r.Health_Facility).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  $("dlFac").innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join("");
+  if(F.facility&&!base().some(facMatch)){F.facility="";}
+  $("dlDisease").innerHTML=DX.map(x=>`<option value="${esc(x.n)}"></option>`).join("");
+}
+const facMatch=r=>{
+  if(!F.facility)return true;
+  const q=F.facility.toLowerCase(),n=String(r.Health_Facility||"").toLowerCase();
+  return FACSET.has(q)?n===q:n.includes(q);
+};
 const base=()=>DATA.filter(r=>(!F.zone||r._zone===F.zone)&&(!F.woreda||r.Woreda===F.woreda));
-const sel=()=>base().filter(r=>String(r._year)===F.year&&(F.week===""||String(r._week)===F.week)&&(!F.status||r._status===F.status));
+const sel=()=>base().filter(r=>String(r._year)===F.year&&(F.week===""||String(r._week)===F.week)&&(!F.status||r._status===F.status)&&(!F.day||r._atDate===F.day)&&facMatch(r));
 const S=(rows,c)=>rows.reduce((s,r)=>s+num(r[c]),0);
+let page=0,dflPage=0;
+function setF(p){
+  p={...p};
+  if(USER&&!USER.admin)delete p.zone;
+  if("zone" in p&&!("woreda" in p))p.woreda="";
+  if("year" in p){p.week="";p._weekTouched=false}
+  Object.assign(F,p);
+  page=0;dflPage=0;syncControls();render();
+}
+function resetAll(){
+  setF({zone:"",woreda:"",week:"",status:"",facility:"",disease:"",day:"",_weekTouched:false});
+}
+$("fYear").onchange=e=>setF({year:e.target.value});
+$("fWeek").onchange=e=>{F._weekTouched=true;setF({week:e.target.value})};
+$("fZone").onchange=e=>setF({zone:e.target.value});
+$("fWoreda").onchange=e=>setF({woreda:e.target.value});
+$("fStatus").onchange=e=>setF({status:e.target.value});
+$("reset").onclick=resetAll;
+let typeTimer;
+const typed=fn=>{clearTimeout(typeTimer);typeTimer=setTimeout(fn,180)};
+function resolveDisease(t){
+  t=t.trim().toLowerCase();if(!t)return"";
+  const ex=DX.find(x=>x.n.toLowerCase()===t);if(ex)return ex.n;
+  const m=DX.filter(x=>x.n.toLowerCase().includes(t));return m.length===1?m[0].n:"";
+}
+$("fDisease").oninput=e=>typed(()=>{
+  const v=resolveDisease(e.target.value);
+  e.target.classList.toggle("bad",!!e.target.value.trim()&&!v);
+  e.target.title=e.target.value.trim()&&!v?"No single disease matches. Pick one from the list.":"";
+  F.disease=v;page=0;dflPage=0;render();
+});
+$("fDisease").onblur=e=>{if(F.disease)e.target.value=F.disease};
+$("fFac").oninput=e=>typed(()=>{F.facility=e.target.value.trim();page=0;dflPage=0;render()});
+$("fFac").onblur=e=>{if(F.facility&&!base().some(facMatch))e.target.classList.add("bad")};
+
+/* click-to-filter on any chart, bar, tile, row or cell */
+const A=(act,v,x={})=>`data-act="${act}" data-v="${esc(v)}"`+(x.z!=null?` data-z="${esc(x.z)}"`:"")+(x.w!=null?` data-w="${esc(x.w)}"`:"")+(x.l?` data-l="${x.l}" data-k="${esc(x.k)}"`:"");
+const rowPatch=(l,k,z,w)=>l==="zone"?{zone:k}:l==="wor"?{zone:z,woreda:k}:{zone:z,woreda:w,facility:k};
+document.addEventListener("click",e=>{
+  const clr=e.target.closest("[data-clr]");
+  if(clr&&USER){const k=clr.dataset.clr;setF(k==="zone"?{zone:"",woreda:""}:{[k]:""});return}
+  const t=e.target.closest("[data-act]");if(!t||!USER)return;
+  const a=t.dataset.act,v=t.dataset.v,z=t.dataset.z,w=t.dataset.w;
+  if(a==="disease")setF({disease:F.disease===v?"":v});
+  else if(a==="zone")setF({zone:F.zone===v?"":v});
+  else if(a==="woreda")setF(F.woreda===v?{woreda:""}:{zone:z,woreda:v});
+  else if(a==="facility")setF(F.facility.toLowerCase()===v.toLowerCase()?{facility:""}:{zone:z,woreda:w,facility:v});
+  else if(a==="status")setF({status:F.status===v?"":v});
+  else if(a==="day")setF({day:F.day===v?"":v});
+  else if(a==="cell")setF({disease:v,...rowPatch(t.dataset.l,t.dataset.k,z,w)});
+});
 const tipEl=$("tip");
 document.addEventListener("mousemove",e=>{
   const t=e.target.closest("[data-tip]");
@@ -362,22 +647,43 @@ document.addEventListener("mousemove",e=>{
 });
 
 /* ---------------- render ---------------- */
-let trendKey="Hypertension (new)",areaKey="Hypertension (new)",page=0,sortKey="_tot",sortDir=-1;
-function bars(el,items,max){
-  max=max??Math.max(1,...items.map(i=>i.v));
-  el.innerHTML=items.length?items.map(i=>`<div class="bar" data-tip="${esc(i.n)}: ${fmt(i.v)}${i.s?" · "+esc(i.s):""}"><span class="n">${esc(i.n)}</span><span class="t"><i style="width:${Math.max(i.v?1.5:0,i.v/max*100)}%"></i></span><span class="x">${fmt(i.v)}</span></div>`).join(""):'<div class="empty">No data for this selection</div>';
+let sortKey="_tot",sortDir=-1;
+function bars(el,items,o={}){
+  const max=o.max??Math.max(1,...items.map(i=>i.v));
+  let h=items.length?items.map(i=>`<div class="bar${i.on?" on":""}${i.a?" clk":""}" ${i.a||""} data-tip="${esc(i.n)}: ${fmt(i.v)}${i.s?" · "+esc(i.s):""}"><span class="n">${esc(i.n)}</span><span class="t"><i style="width:${Math.max(i.v?1.5:0,i.v/max*100)}%"></i></span><span class="x">${fmt(i.v)}</span></div>`).join(""):'<div class="empty">No data for this selection</div>';
+  if(items.length&&o.total!=null)h+=`<div class="bar tot"><span class="n">${esc(o.totalLabel||"Total")}</span><span class="t"></span><span class="x">${fmt(o.total)}</span></div>`;
+  el.innerHTML=h;
 }
+const cl=v=>v>=95?"var(--good)":v>=80?"var(--warn)":"var(--bad)";
+function pxCell(v){return `<td data-tip="${v}%"><span class="pbar"><i style="width:${Math.min(100,v)}%;background:${cl(v)}"></i></span><b style="color:${cl(v)}">${v}%</b></td>`}
 function render(){
+  if(!USER)return;
   const rows=sel(),all=base();
+  const dx=F.disease?DXBY[F.disease]:null;
+  const crows=dx?rows.filter(r=>dxHas(r,dx)):rows;       // rows that reported the selected disease
   const wlabel=F.week===""?`${F.year}, all weeks`:`Epi week ${F.week}, ${F.year}`;
-    $("subtitle").textContent=`${wlabel} · ${F.woreda||F.zone||"Addis Ababa"} · ${fmt(rows.length)} facility reports · updated ${LOADED.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
+  $("subtitle").textContent=`${wlabel} · ${F.facility||F.woreda||F.zone||"Addis Ababa"}${F.disease?" · "+F.disease:""} · ${fmt(rows.length)} facility reports · updated ${LOADED.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
+
+  /* filter chips */
+  const chips=[];
+  if(USER.admin?F.zone:false)chips.push(["zone","Sub-city",F.zone]);
+  if(!USER.admin)chips.push(["","Sub-city",F.zone||USER.sub,1]);
+  if(F.woreda)chips.push(["woreda","Woreda",F.woreda]);
+  if(F.facility)chips.push(["facility","Facility",F.facility]);
+  if(F.disease)chips.push(["disease","Disease",F.disease]);
+  if(F.status)chips.push(["status","Status",F.status]);
+  if(F.day)chips.push(["day","Submitted",fmtDay(F.day)]);
+  $("chips").innerHTML=chips.length?`<span>Showing:</span>`+chips.map(c=>c[3]?`<span class="chip lock" title="Your sub-city is fixed">🔒 ${esc(c[1])}: ${esc(c[2])}</span>`:`<span class="chip">${esc(c[1])}: ${esc(c[2])}<button data-clr="${c[0]}" aria-label="Remove ${esc(c[1])} filter">×</button></span>`).join(""):"";
 
   /* KPIs */
   const exp=S(rows,"All_Total_sites_Expected_by_RHB"),rep=S(rows,"All_Total_sites_Reported"),ont=S(rows,"All_Total_sites_Reported_Ontime");
-  const dsum=k=>{const d=D.find(x=>x[0]===k);return S(rows,d[1])};
+  const dsum=k=>S(rows,D.find(x=>x[0]===k)[1]);
   const totalCases=rows.reduce((s,r)=>s+r._tot,0),deaths=rows.reduce((s,r)=>s+r._death,0);
   const watchOn=WATCH.filter(k=>{const d=D.find(x=>x[0]===k);return S(rows,d[1])+(d[2]?S(rows,d[2]):0)>0}).length;
-  const K=[
+  const K=[];
+  if(dx){const m=rows.reduce((s,r)=>s+dxMain(r,dx),0),dd=rows.reduce((s,r)=>s+dxDeaths(r,dx),0);
+    K.push([dx.n,fmt(m),`${fmt(crows.length)} facilit${crows.length===1?"y":"ies"} reported${dx.c?" · "+fmt(dd)+" deaths":""}`,false,true])}
+  K.push(
    ["Facilities reported",fmt(rep),`of ${fmt(exp)} expected`],
    ["Completeness",pct(rep,exp)+"%","reported ÷ expected"],
    ["Timeliness",pct(ont,exp)+"%",`${fmt(exp-ont)} not on time`],
@@ -390,155 +696,206 @@ function render(){
    ["Maternal deaths",fmt(S(rows,"Maternal_death")),"reported",S(rows,"Maternal_death")>0],
    ["Perinatal deaths",fmt(S(rows,"Perinatal_death")),"reported",S(rows,"Perinatal_death")>0],
    ["All deaths reported",fmt(deaths),"incl. maternal & perinatal",deaths>0],
-   ["Watchlist signals",String(watchOn),"priority diseases with ≥1 report",watchOn>0]
-  ];
-  $("kpis").innerHTML=K.map(k=>`<div class="kpi${k[3]?" alert":""}"><div class="l">${k[0]}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join("");
+   ["Watchlist signals",String(watchOn),"priority diseases with ≥1 report",watchOn>0]);
+  $("kpis").innerHTML=K.map(k=>`<div class="kpi${k[3]?" alert":""}${k[4]?" pick":""}"><div class="l">${esc(k[0])}</div><div class="v">${k[1]}</div><div class="s">${k[2]}</div></div>`).join("");
 
   /* burden */
   const burden=D.map(d=>({n:d[0],v:S(rows,d[1]),s:d[2]?`${fmt(S(rows,d[2]))} deaths`:""})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
-  $("burdenHint").textContent=`Total reported cases · ${wlabel}`;
-  bars($("burden"),burden.slice(0,14));
+  let shown=burden.slice(0,14);
+  if(F.disease&&DXBY[F.disease].c&&!shown.some(b=>b.n===F.disease)){const b=burden.find(x=>x.n===F.disease);if(b)shown.push(b)}
+  $("burdenHint").textContent=`Total reported cases · ${wlabel}. Click a disease to filter everything.`;
+  bars($("burden"),shown.map(b=>({...b,a:A("disease",b.n),on:b.n===F.disease})),{total:totalCases,totalLabel:"Total, all diseases"});
 
   /* watchlist */
-  const wl=[...WATCH.map(k=>{const d=D.find(x=>x[0]===k);return[k,S(rows,d[1]),d[2]?S(rows,d[2]):0]}),["Maternal death",S(rows,"Maternal_death"),null]];
-  $("watch").innerHTML=wl.map(([k,c,dd])=>{const on=c+(dd||0)>0;return `<div class="w${on?" on":""}"><b>${fmt(c)}</b>${esc(k)}<br><span>${dd!=null?fmt(dd)+" deaths":"deaths"}</span></div>`}).join("");
+  const wl=[...WATCH.map(k=>{const d=D.find(x=>x[0]===k);return[k,S(rows,d[1]),d[2]?S(rows,d[2]):0,k]}),["Maternal death",S(rows,"Maternal_death"),null,"Maternal deaths"]];
+  $("watch").innerHTML=wl.map(([k,c,dd,key])=>{const on=c+(dd||0)>0;return `<div class="w${on?" on":""}${key===F.disease?" sel":""}" ${A("disease",key)}><b>${fmt(c)}</b>${esc(k)}<br><span>${dd!=null?fmt(dd)+" deaths":"deaths"}</span></div>`}).join("");
 
-  /* heatmap */
-  const topD=burden.slice(0,9).map(b=>b.n);
-  const zones=[...new Set(rows.map(r=>r._zone))].sort((a,b)=>a.localeCompare(b));
-  const mat=zones.map(z=>topD.map(k=>{const d=D.find(x=>x[0]===k);return S(rows.filter(r=>r._zone===z),d[1])}));
-  const cmax=topD.map((_,j)=>Math.max(1,...mat.map(m=>m[j])));
-  $("heat").innerHTML=`<thead><tr><th class="l">Sub-city</th><th>Facilities</th>${topD.map(k=>`<th>${esc(k)}</th>`).join("")}<th>Total</th></tr></thead><tbody>`+
-    zones.map((z,i)=>{const zr=rows.filter(r=>r._zone===z);return `<tr><td class="l">${esc(z)}</td><td>${fmt(zr.length)}</td>${mat[i].map((v,j)=>{const a=v/cmax[j];return `<td class="h" style="background:rgba(var(--heat),${(a*.55).toFixed(2)})" data-tip="${esc(z)} · ${esc(topD[j])}: ${fmt(v)}">${fmt(v)}</td>`}).join("")}<td><b>${fmt(mat[i].reduce((a,b)=>a+b,0))}</b></td></tr>`}).join("")+"</tbody>";
+  /* disease x facility list */
+  renderDfl(rows);
 
-  /* tabs */
+  /* heatmap: sub-city -> woreda -> facility as filters narrow */
+  const lvl=F.woreda||F.facility?"fac":F.zone?"wor":"zone";
+  const keyFn=lvl==="fac"?r=>r.Health_Facility:lvl==="wor"?r=>r.Woreda:r=>r._zone;
+  const lvlName={fac:"Facility",wor:"Woreda",zone:"Sub-city"}[lvl];
+  $("heatTitle").textContent=`${lvlName} heatmap`;
+  const topD=dx?[dx.n]:burden.slice(0,9).map(b=>b.n);
+  const grp=new Map();(dx?crows:rows).forEach(r=>{const k=keyFn(r);(grp.get(k)||grp.set(k,[]).get(k)).push(r)});
+  let hrows=[...grp.entries()].map(([k,rs])=>({k,rs,z:rs[0]._zone,w:rs[0].Woreda,v:topD.map(n=>{const x=DXBY[n];return rs.reduce((s,r)=>s+dxMain(r,x),0)})}));
+  hrows.forEach(h=>h.t=h.v.reduce((a,b)=>a+b,0));
+  hrows.sort(lvl==="zone"?(a,b)=>a.k.localeCompare(b.k):(a,b)=>b.t-a.t||a.k.localeCompare(b.k));
+  const cmax=topD.map((_,j)=>Math.max(1,...hrows.map(h=>h.v[j])));
+  const hOpen=lvl==="zone"?"zone":lvl;
+  $("heat").innerHTML=`<thead><tr><th class="l">${lvlName}</th><th>Facilities</th>${topD.map(k=>`<th>${esc(k)}</th>`).join("")}<th>Total</th></tr></thead><tbody>`+
+    (hrows.length?hrows.map(h=>`<tr><td class="l clk" ${A(lvl==="zone"?"zone":lvl==="wor"?"woreda":"facility",h.k,{z:h.z,w:h.w})}>${esc(h.k)}</td><td>${fmt(h.rs.length)}</td>${h.v.map((v,j)=>{const a=v/cmax[j];return `<td class="h clk" style="background:rgba(var(--heat),${(a*.55).toFixed(2)})" ${A("cell",topD[j],{z:h.z,w:h.w,l:hOpen,k:h.k})} data-tip="${esc(h.k)} · ${esc(topD[j])}: ${fmt(v)}">${fmt(v)}</td>`}).join("")}<td><b>${fmt(h.t)}</b></td></tr>`).join(""):`<tr><td class="l" colspan="${topD.length+3}"><div class="empty">No data for this selection</div></td></tr>`)+
+    `</tbody><tfoot><tr><td class="l">Total</td><td>${fmt(hrows.reduce((s,h)=>s+h.rs.length,0))}</td>${topD.map((_,j)=>`<td>${fmt(hrows.reduce((s,h)=>s+h.v[j],0))}</td>`).join("")}<td>${fmt(hrows.reduce((s,h)=>s+h.t,0))}</td></tr></tfoot>`;
+
+  /* top areas (the tabs set the disease filter) */
   const names=D.map(d=>d[0]).filter(k=>S(all,D.find(x=>x[0]===k)[1])>0);
-  if(!names.includes(trendKey))trendKey=names[0]||trendKey;
-  if(!names.includes(areaKey))areaKey=names[0]||areaKey;
   const topNames=names.map(n=>[n,S(all,D.find(x=>x[0]===n)[1])]).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]);
-  const tabs=(el,cur,fn)=>{el.innerHTML=topNames.map(n=>`<button class="${n===cur?"on":""}" data-k="${esc(n)}">${esc(n)}</button>`).join("");el.querySelectorAll("button").forEach(b=>b.onclick=()=>{fn(b.dataset.k);render()})};
-  tabs($("trendTabs"),trendKey,k=>trendKey=k);tabs($("areaTabs"),areaKey,k=>areaKey=k);
+  const areaDx=dx||DXBY[topNames[0]||"Hypertension (new)"];
+  const tabList=[...topNames];if(dx&&!tabList.includes(dx.n))tabList.push(dx.n);
+  $("areaTabs").innerHTML=tabList.map(n=>`<button class="${n===areaDx.n?"on":""}" ${A("disease",n)}>${esc(n)}</button>`).join("");
+  const aLvl=F.woreda||F.facility?"fac":F.zone?"wor":"zone";
+  $("areasTitle").textContent=`Top ${aLvl==="fac"?"facilities":aLvl==="wor"?"woredas":"sub-cities"} · ${areaDx.n}`;
+  $("areasHint").textContent=dx?"Filtered by the selected disease. Click a bar to drill down.":"Showing the most reported disease. Click a tab or a bar to filter.";
+  const agg=new Map();rows.forEach(r=>{const k=aLvl==="fac"?r.Health_Facility:aLvl==="wor"?r.Woreda:r._zone;const o=agg.get(k)||agg.set(k,{v:0,z:r._zone,w:r.Woreda}).get(k);o.v+=dxMain(r,areaDx)});
+  const aItems=[...agg.entries()].map(([n,o])=>({n,v:o.v,z:o.z,w:o.w})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  bars($("areas"),aItems.slice(0,12).map(i=>({...i,a:A(aLvl==="zone"?"zone":aLvl==="wor"?"woreda":"facility",i.n,{z:i.z,w:i.w}),on:(aLvl==="fac"&&i.n.toLowerCase()===F.facility.toLowerCase())})),{total:aItems.reduce((s,i)=>s+i.v,0),totalLabel:`Total, all ${aLvl==="fac"?"facilities":aLvl==="wor"?"woredas":"sub-cities"}`});
 
-  /* trend */
-  const td=D.find(x=>x[0]===trendKey);
-  const pts={};
-  all.filter(r=>String(r._year)===F.year).forEach(r=>{pts[r._week]=(pts[r._week]||0)+num(r[td[1]])});
-  const wks=Object.keys(pts).map(Number).sort((a,b)=>a-b);
-  $("trend").innerHTML=trendSVG(wks.map(w=>[w,pts[w]]),trendKey);
+  /* reporting performance */
+  const pg=new Map();rows.forEach(r=>{const k=aLvl==="fac"?r.Health_Facility:aLvl==="wor"?r.Woreda:r._zone;(pg.get(k)||pg.set(k,[]).get(k)).push(r)});
+  const perfRows=[...pg.entries()].map(([k,zr])=>({z:k,zz:zr[0]._zone,w:zr[0].Woreda,e:S(zr,"All_Total_sites_Expected_by_RHB"),p:S(zr,"All_Total_sites_Reported"),o:S(zr,"All_Total_sites_Reported_Ontime"),n:zr.length,d:zr.filter(x=>isDone(x._status)).length}))
+    .sort((a,b)=>aLvl==="zone"?a.z.localeCompare(b.z):(pct(a.p,a.e)-pct(b.p,b.e))||a.z.localeCompare(b.z));
+  const pLabel={fac:"Facility",wor:"Woreda",zone:"Sub-city"}[aLvl];
+  $("perfTitle").textContent=`Reporting performance by ${pLabel.toLowerCase()}`;
+  const tp=perfRows.reduce((a,r)=>({e:a.e+r.e,p:a.p+r.p,o:a.o+r.o,n:a.n+r.n,d:a.d+r.d}),{e:0,p:0,o:0,n:0,d:0});
+  const pc=v=>`style="color:${cl(v)};font-weight:600"`;
+  $("perf").innerHTML=`<thead><tr><th class="l">${pLabel}</th><th>Expected</th><th>Reported</th><th>On time</th><th>Complete</th><th>Timely</th><th>Status completed</th></tr></thead><tbody>`+
+    (perfRows.length?perfRows.map(r=>`<tr class="clk" ${A(aLvl==="zone"?"zone":aLvl==="wor"?"woreda":"facility",r.z,{z:r.zz,w:r.w})}><td class="l">${esc(r.z)}</td><td>${fmt(r.e)}</td><td>${fmt(r.p)}</td><td>${fmt(r.o)}</td><td ${pc(pct(r.p,r.e))}>${pct(r.p,r.e)}%</td><td ${pc(pct(r.o,r.e))}>${pct(r.o,r.e)}%</td><td ${pc(pct(r.d,r.n))} data-tip="${fmt(r.d)} of ${fmt(r.n)} reports have status Completed">${pct(r.d,r.n)}%</td></tr>`).join(""):`<tr><td class="l" colspan="7"><div class="empty">No data for this selection</div></td></tr>`)+
+    `</tbody><tfoot><tr><td class="l">Total</td><td>${fmt(tp.e)}</td><td>${fmt(tp.p)}</td><td>${fmt(tp.o)}</td><td ${pc(pct(tp.p,tp.e))}>${pct(tp.p,tp.e)}%</td><td ${pc(pct(tp.o,tp.e))}>${pct(tp.o,tp.e)}%</td><td ${pc(pct(tp.d,tp.n))}>${pct(tp.d,tp.n)}%</td></tr></tfoot>`;
 
-  /* areas */
-  const ad=D.find(x=>x[0]===areaKey);
-  const byWoreda=!!F.zone&&!F.woreda;
-  const keyOf=r=>F.woreda?r.Health_Facility:(F.zone?r.Woreda:r._zone);
-  const agg={};rows.forEach(r=>{const k=keyOf(r);agg[k]=(agg[k]||0)+num(r[ad[1]])});
-  bars($("areas"),Object.entries(agg).map(([n,v])=>({n,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,12));
-
-  /* performance */
-  const perfRows=zones.map(z=>{const zr=rows.filter(r=>r._zone===z);const e=S(zr,"All_Total_sites_Expected_by_RHB"),p=S(zr,"All_Total_sites_Reported"),o=S(zr,"All_Total_sites_Reported_Ontime");return{z,e,p,o,n:zr.length,d:zr.filter(x=>isDone(x._status)).length}});
-  const colr=v=>v>=95?"var(--good)":v>=80?"var(--warn)":"var(--bad)";
-  $("perf").innerHTML=`<thead><tr><th class="l">Sub-city</th><th>Expected</th><th>Reported</th><th>On time</th><th>Complete</th><th>Timely</th><th>Status completed</th></tr></thead><tbody>`+
-    perfRows.map(r=>`<tr><td class="l">${esc(r.z)}</td><td>${fmt(r.e)}</td><td>${fmt(r.p)}</td><td>${fmt(r.o)}</td><td style="color:${colr(pct(r.p,r.e))};font-weight:600">${pct(r.p,r.e)}%</td><td style="color:${colr(pct(r.o,r.e))};font-weight:600">${pct(r.o,r.e)}%</td><td style="color:${colr(pct(r.d,r.n))};font-weight:600" data-tip="${fmt(r.d)} of ${fmt(r.n)} reports have status Completed">${pct(r.d,r.n)}%</td></tr>`).join("")+"</tbody>";
-
+  const ft=FTYPES.map(([n,k])=>({n,e:S(rows,`No_of_${k}_expected_by_RHB`),p:S(rows,`No_of_${k}_Reported`),o:S(rows,`No_of_${k}_Reported_Ontime`)}));
+  const fe=ft.reduce((s,x)=>s+x.e,0),fp=ft.reduce((s,x)=>s+x.p,0),fo=ft.reduce((s,x)=>s+x.o,0);
   $("ftype").innerHTML=`<thead><tr><th class="l">Facility type</th><th>Expected</th><th>Reported</th><th>On time</th><th>Timely</th></tr></thead><tbody>`+
-    FTYPES.map(([n,k])=>{const e=S(rows,`No_of_${k}_expected_by_RHB`),p=S(rows,`No_of_${k}_Reported`),o=S(rows,`No_of_${k}_Reported_Ontime`);return `<tr><td class="l">${n}</td><td>${fmt(e)}</td><td>${fmt(p)}</td><td>${fmt(o)}</td><td>${e?pct(o,e)+"%":"–"}</td></tr>`}).join("")+"</tbody>";
+    ft.map(x=>`<tr><td class="l">${x.n}</td><td>${fmt(x.e)}</td><td>${fmt(x.p)}</td><td>${fmt(x.o)}</td><td>${x.e?pct(x.o,x.e)+"%":"–"}</td></tr>`).join("")+
+    `</tbody><tfoot><tr><td class="l">Total</td><td>${fmt(fe)}</td><td>${fmt(fp)}</td><td>${fmt(fo)}</td><td>${fe?pct(fo,fe)+"%":"–"}</td></tr></tfoot>`;
 
+  /* status + day */
   const stc={};rows.forEach(r=>stc[r._status]=(stc[r._status]||0)+1);
-  bars($("byStatus"),Object.entries(stc).sort((a,b)=>b[1]-a[1]).map(([n,v])=>({n,v,s:pct(v,rows.length)+"% of reports"})));
-  const days={};rows.forEach(r=>{if(r._at)days[r._at]=(days[r._at]||0)+1});
-  bars($("byDay"),Object.entries(days).sort().map(([d,v])=>({n:new Date(d+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}),v})));
+  bars($("byStatus"),Object.entries(stc).sort((a,b)=>b[1]-a[1]).map(([n,v])=>({n,v,s:pct(v,rows.length)+"% of reports",a:A("status",n),on:n===F.status})),{total:rows.length,totalLabel:"Total reports"});
+  const days={};let noDay=0;rows.forEach(r=>{if(r._atDate)days[r._atDate]=(days[r._atDate]||0)+1;else noDay++});
+  const dItems=Object.entries(days).sort().map(([d,v])=>({n:fmtDay(d),v,a:A("day",d),on:d===F.day}));
+  if(noDay)dItems.push({n:"Time not recorded",v:noDay});
+  bars($("byDay"),dItems,{total:rows.length,totalLabel:"Total reports"});
 
-  renderTable(rows);
+  renderTable(rows,crows);
   renderPerfX(rows);
 }
-function trendSVG(p,label){
-  if(!p.length)return '<div class="empty">No data</div>';
-  const W=560,H=210,m={l:42,r:14,t:12,b:28};
-  const xs=p.map(a=>a[0]),ys=p.map(a=>a[1]);
-  const x0=Math.min(...xs),x1=Math.max(...xs),ymax=Math.max(1,...ys)*1.12;
-  const X=x=>x1===x0?(W+m.l-m.r)/2:m.l+(x-x0)/(x1-x0)*(W-m.l-m.r),Y=y=>H-m.b-y/ymax*(H-m.t-m.b);
-  let g="";for(let i=0;i<=4;i++){const v=ymax*i/4;g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
-  const path=p.map((a,i)=>(i?"L":"M")+X(a[0]).toFixed(1)+","+Y(a[1]).toFixed(1)).join("");
-  const area=p.length>1?`<path d="${path}L${X(x1)},${Y(0)}L${X(x0)},${Y(0)}Z" fill="rgba(var(--heat),.14)"/>`:"";
-  const step=Math.ceil(p.length/10);
-  const xl=p.map((a,i)=>i%step?"":`<text x="${X(a[0])}" y="${H-8}" text-anchor="middle">W${a[0]}</text>`).join("");
-  const dots=p.map(a=>`<circle cx="${X(a[0])}" cy="${Y(a[1])}" r="4" fill="var(--accent)" data-tip="${esc(label)} · week ${a[0]}: ${fmt(a[1])}"/>`).join("");
-  const note=p.length===1?`<div class="hint" style="margin-top:4px">Only one epi week is in the data right now. The trend line fills in as new weeks are added to the sheet.</div>`:"";
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Weekly trend of ${esc(label)}">${g}${area}<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.4"/>${dots}${xl}</svg>${note}`;
+
+/* ---------------- disease x facility list ---------------- */
+let dflSort="c",dflDir=-1,dflList=[];
+const DFL_COLS=[["Disease","dn",1,"disease"],["Sub-city","z",1],["Woreda","w",1],["Health facility","f",1,"facility"],["Cases","c"],["Deaths","d"],["Submitted (at:)","ts",1],["Completed by","by",1]];
+function renderDfl(rows){
+  const list=F.disease?[DXBY[F.disease]]:DX;
+  let L=[];
+  rows.forEach(r=>list.forEach(x=>{const c=x.c?num(r[x.c]):0,d=x.d?num(r[x.d]):0;if(c+d>0)L.push({dn:x.n,z:r._zone,w:r.Woreda||"",f:r.Health_Facility||"",c,d,ts:r._ts,at:r._at,by:r["Completed by:"]||"",death:!x.c})}));
+  const colKey=dflSort,txt=["dn","z","w","f","by"].includes(colKey);
+  L.sort((a,b)=>{const x=txt?String(a[colKey]).localeCompare(String(b[colKey])):a[colKey]-b[colKey];return (x||b.c-a.c||a.f.localeCompare(b.f))*dflDir});
+  dflList=L;
+  const nFac=new Set(L.map(x=>x.f+"|"+x.w)).size;
+  $("dflTitle").textContent=F.disease?`Health facilities that reported ${F.disease}`:"Cases by disease and health facility";
+  $("dflHint").textContent=F.disease?`${fmt(nFac)} facilit${nFac===1?"y":"ies"} in the current selection. Change the sub-city, woreda or week above to narrow further.`:"Every disease with at least one case or death, by facility. Pick a disease (search box above, a bar or a tile) to see only the facilities that reported it.";
+  const per=25,pages=Math.max(1,Math.ceil(L.length/per));dflPage=Math.min(dflPage,pages-1);
+  const cols=DFL_COLS.filter(c=>USER.admin||c[1]!=="z");
+  const tc=L.reduce((s,x)=>s+x.c,0),td=L.reduce((s,x)=>s+x.d,0);
+  $("dfl").innerHTML=`<thead><tr>${cols.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[1]}">${c[0]}${dflSort===c[1]?(dflDir<0?" ▾":" ▴"):""}</th>`).join("")}</tr></thead><tbody>`+
+    (L.length?L.slice(dflPage*per,dflPage*per+per).map(x=>`<tr>${cols.map(c=>{
+      const k=c[1];
+      if(k==="dn")return `<td class="l clk" ${A("disease",x.dn)}>${esc(x.dn)}</td>`;
+      if(k==="f")return `<td class="l clk" ${A("facility",x.f,{z:x.z,w:x.w})}>${esc(x.f)}</td>`;
+      if(k==="ts")return `<td class="l">${esc(x.at)}</td>`;
+      if(k==="c")return `<td>${x.death?"–":fmt(x.c)}</td>`;
+      if(k==="d")return `<td>${fmt(x.d)}</td>`;
+      return `<td class="l">${esc(x[k])}</td>`}).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${cols.length}"><div class="empty">${F.disease?"No facility reported "+esc(F.disease)+" in this selection":"No cases or deaths in this selection"}</div></td></tr>`)+
+    `</tbody><tfoot><tr>${cols.map((c,i)=>i===0?`<td class="l">Total · ${fmt(L.length)} row${L.length===1?"":"s"}</td>`:c[1]==="c"?`<td>${fmt(tc)}</td>`:c[1]==="d"?`<td>${fmt(td)}</td>`:"<td></td>").join("")}</tr></tfoot>`;
+  $("dfl").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;dflDir=dflSort===k?-dflDir:(["dn","z","w","f","by"].includes(k)?1:-1);dflSort=k;renderDfl(sel())});
+  $("dflInfo").textContent=`${fmt(L.length)} rows · page ${dflPage+1} of ${pages}`;
 }
+$("dflPrev").onclick=()=>{dflPage=Math.max(0,dflPage-1);renderDfl(sel())};
+$("dflNext").onclick=()=>{dflPage++;renderDfl(sel())};
+const csvLine=a=>a.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",");
+function download(name,lines){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv"}));a.download=name;a.click()}
+$("dflExport").onclick=()=>download(`idsr_${(F.disease||"all_diseases").replace(/\W+/g,"_").toLowerCase()}_${F.year}_w${F.week||"all"}.csv`,
+  [csvLine(["Disease","Sub-city","Woreda","Health facility","Cases","Deaths","Submitted (at:)","Completed by"])].concat(dflList.map(x=>csvLine([x.dn,x.z,x.w,x.f,x.death?"":x.c,x.d,x.at,x.by]))));
 
 /* ---------------- completeness & timeliness explorer ---------------- */
 let pxLevel="Sub-city",pxSort="t",pxDir=1,pxList=[];
 const isHosp=r=>num(r.No_of_Gov_Hosps_expected_by_RHB)>0;
-const cl=v=>v>=95?"var(--good)":v>=80?"var(--warn)":"var(--bad)";
 function pxBuild(rows){
-  let g={};
+  const g={};
   const src=pxLevel==="Hospitals"?rows.filter(isHosp):pxLevel==="Woreda"?rows.filter(r=>r._zone!==OTHER_ZONE):rows;
   src.forEach(r=>{
-    const k=pxLevel==="Sub-city"?r._zone:pxLevel==="Woreda"?r.Woreda:r.Health_Facility+"|"+r.Woreda;
-    const o=g[k]||(g[k]={name:pxLevel==="Hospitals"?r.Health_Facility:(pxLevel==="Woreda"?r.Woreda:r._zone),z:r._zone,w:r.Woreda,n:0,e:0,p:0,o:0,d:0});
+    const k=pxLevel==="Sub-city"?r._zone:pxLevel==="Woreda"?r._zone+"|"+r.Woreda:r.Health_Facility+"|"+r.Woreda;
+    const o=g[k]||(g[k]={name:(pxLevel==="Hospitals"||pxLevel==="Facility")?r.Health_Facility:(pxLevel==="Woreda"?r.Woreda:r._zone),z:r._zone,w:r.Woreda,n:0,e:0,p:0,o:0,d:0});
     o.n++;o.e+=num(r.All_Total_sites_Expected_by_RHB);o.p+=num(r.All_Total_sites_Reported);o.o+=num(r.All_Total_sites_Reported_Ontime);if(isDone(r._status))o.d++;
   });
   return Object.values(g).map(o=>({...o,c:pct(o.p,o.e),t:pct(o.o,o.e),s:pct(o.d,o.n)}));
 }
-function pxCell(v){return `<td data-tip="${v}%"><span class="pbar"><i style="width:${Math.min(100,v)}%;background:${cl(v)}"></i></span><b style="color:${cl(v)}">${v}%</b></td>`}
 function renderPerfX(rows){
-  $("pxTabs").innerHTML=["Sub-city","Woreda","Hospitals"].map(n=>`<button class="${n===pxLevel?"on":""}" data-k="${n}">${n==="Hospitals"?"Public/Government hospitals":n}</button>`).join("");
+  const levels=USER.admin?["Sub-city","Woreda","Facility","Hospitals"]:["Woreda","Facility"];
+  if(!levels.includes(pxLevel))pxLevel=levels[0];
+  const lname={Hospitals:"Public/Government hospitals"};
+  $("pxTabs").innerHTML=levels.map(n=>`<button class="${n===pxLevel?"on":""}" data-k="${n}">${lname[n]||n}</button>`).join("");
   $("pxTabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{pxLevel=b.dataset.k;renderPerfX(sel())});
   const all=pxBuild(rows);
   const E=all.reduce((s,o)=>s+o.e,0),P=all.reduce((s,o)=>s+o.p,0),O=all.reduce((s,o)=>s+o.o,0),N=all.reduce((s,o)=>s+o.n,0),Dn=all.reduce((s,o)=>s+o.d,0);
   const full=all.filter(o=>o.c>=100&&o.t>=100&&o.s>=100).length;
-  $("pxSum").innerHTML=`<span><b>${fmt(all.length)}</b> ${pxLevel==="Sub-city"?"sub-cities":pxLevel==="Woreda"?"woredas":"public/government hospitals"}</span><span>Completeness <b style="color:${cl(pct(P,E))}">${pct(P,E)}%</b></span><span>Timeliness <b style="color:${cl(pct(O,E))}">${pct(O,E)}%</b></span><span>Status completed <b style="color:${cl(pct(Dn,N))}">${pct(Dn,N)}%</b></span><span><b>${fmt(full)}</b> of ${fmt(all.length)} at 100% on all three</span>`;
+  const unit={"Sub-city":"sub-cities",Woreda:"woredas",Facility:"facilities",Hospitals:"public/government hospitals"}[pxLevel];
+  $("pxSum").innerHTML=`<span><b>${fmt(all.length)}</b> ${unit}</span><span>Completeness <b style="color:${cl(pct(P,E))}">${pct(P,E)}%</b></span><span>Timeliness <b style="color:${cl(pct(O,E))}">${pct(O,E)}%</b></span><span>Status completed <b style="color:${cl(pct(Dn,N))}">${pct(Dn,N)}%</b></span><span><b>${fmt(full)}</b> of ${fmt(all.length)} at 100% on all three</span>`;
   const only=$("pxOnly").checked;
   pxList=all.filter(o=>!only||o.c<100||o.t<100||o.s<100);
   const strKeys=["name","z","w"];
   pxList.sort((a,b)=>{const x=strKeys.includes(pxSort)?String(a[pxSort]).localeCompare(String(b[pxSort])):a[pxSort]-b[pxSort];return (x||a.name.localeCompare(b.name))*pxDir});
-  const cols=[[pxLevel==="Hospitals"?"Hospital":pxLevel==="Woreda"?"Woreda":"Sub-city / group","name",1],...(pxLevel==="Woreda"?[["Sub-city","z",1]]:[]),["Reports","n"],["Expected","e"],["Reported","p"],["On time","o"],["Completeness","c"],["Timeliness","t"],["Status completed","s"]];
+  const nameLbl={"Sub-city":"Sub-city / group",Woreda:"Woreda",Facility:"Health facility",Hospitals:"Hospital"}[pxLevel];
+  const cols=[[nameLbl,"name",1],...(pxLevel==="Woreda"&&USER.admin?[["Sub-city","z",1]]:[]),...((pxLevel==="Facility"||pxLevel==="Hospitals")?[["Woreda","w",1]]:[]),["Reports","n"],["Expected","e"],["Reported","p"],["On time","o"],["Completeness","c"],["Timeliness","t"],["Status completed","s"]];
+  const act=o=>pxLevel==="Sub-city"?A("zone",o.z):pxLevel==="Woreda"?A("woreda",o.name,{z:o.z}):A("facility",o.name,{z:o.z,w:o.w});
+  const tot={n:N,e:E,p:P,o:O,c:pct(P,E),t:pct(O,E),s:pct(Dn,N)};
   $("px").innerHTML=`<thead><tr>${cols.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[1]}">${c[0]}${pxSort===c[1]?(pxDir>0?" ▴":" ▾"):""}</th>`).join("")}</tr></thead><tbody>`+
-    (pxList.length?pxList.map(o=>`<tr>${cols.map(c=>c[1]==="c"||c[1]==="t"||c[1]==="s"?pxCell(o[c[1]]):c[2]?`<td class="l">${esc(o[c[1]])}</td>`:`<td>${fmt(o[c[1]])}</td>`).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${cols.length}"><div class="empty">${only?"Everything is at 100%.":pxLevel==="Hospitals"&&F.zone&&F.zone!==OTHER_ZONE?"Public/Government hospitals are not listed under a sub-city. Set the sub-city filter to All.":"No data for this selection"}</div></td></tr>`)+"</tbody>";
+    (pxList.length?pxList.map(o=>`<tr class="clk" ${act(o)}>${cols.map(c=>c[1]==="c"||c[1]==="t"||c[1]==="s"?pxCell(o[c[1]]):c[2]?`<td class="l">${esc(o[c[1]])}</td>`:`<td>${fmt(o[c[1]])}</td>`).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${cols.length}"><div class="empty">${only?"Everything is at 100%.":pxLevel==="Hospitals"&&F.zone&&F.zone!==OTHER_ZONE?"Public/Government hospitals are not listed under a sub-city. Set the sub-city filter to All.":"No data for this selection"}</div></td></tr>`)+
+    `</tbody><tfoot><tr>${cols.map((c,i)=>i===0?`<td class="l">Total</td>`:["n","e","p","o"].includes(c[1])?`<td>${fmt(tot[c[1]])}</td>`:["c","t","s"].includes(c[1])?pxCell(tot[c[1]]):"<td></td>").join("")}</tr></tfoot>`;
   $("px").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;pxDir=pxSort===k?-pxDir:1;pxSort=k;renderPerfX(sel())});
 }
 $("pxOnly").onchange=()=>renderPerfX(sel());
-$("pxExport").onclick=()=>{
-  const head=["Level","Name","Sub-city","Woreda","Reports","Expected","Reported","On time","Completeness %","Timeliness %","Status completed %"];
-  const L=[head.join(",")].concat(pxList.map(o=>[pxLevel,o.name,o.z,o.w,o.n,o.e,o.p,o.o,o.c,o.t,o.s].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")));
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([L.join("\n")],{type:"text/csv"}));a.download=`idsr_${pxLevel.toLowerCase()}_performance.csv`;a.click();
-};
+$("pxExport").onclick=()=>download(`idsr_${pxLevel.toLowerCase()}_performance.csv`,
+  [csvLine(["Level","Name","Sub-city","Woreda","Reports","Expected","Reported","On time","Completeness %","Timeliness %","Status completed %"])].concat(pxList.map(o=>csvLine([pxLevel,o.name,o.z,o.w,o.n,o.e,o.p,o.o,o.c,o.t,o.s]))));
 
 /* ---------------- facility table ---------------- */
-const COLS=[["Sub-city","_zone",1],["Woreda","Woreda",1],["Facility","Health_Facility",1],["Malaria","Total_Malaria_Confirmed_and_Clinical"],["Hypert.","Hypertention_new_Total_Cases"],["Diabetes","Diabetic_Mellitus_new_Total_Cases"],["Pneum. U5","Sever_pneumonia_in_children_U5_Total_Cases"],["Total cases","_tot"],["Deaths","_death"],["Status","_status",1],["Timely %","Timeliness"],["Submitted","_at",1],["By","Completed by:",1]];
-let tblRows=[];
-function renderTable(rows){
+const COLS=[["Sub-city","_zone",1],["Woreda","Woreda",1],["Facility","Health_Facility",1],["Malaria","Total_Malaria_Confirmed_and_Clinical"],["Hypert.","Hypertention_new_Total_Cases"],["Diabetes","Diabetic_Mellitus_new_Total_Cases"],["Pneum. U5","Sever_pneumonia_in_children_U5_Total_Cases"],["Total cases","_tot"],["Deaths","_death"],["Status","_status",1],["Timely %","Timeliness"],["Submitted (at:)","_at",1,"_ts"],["By","Completed by:",1]];
+let tblRows=[],tblCols=COLS;
+function renderTable(rows,crows){
+  const dx=F.disease?DXBY[F.disease]:null;
+  tblCols=COLS.filter(c=>USER.admin||c[1]!=="_zone");
+  if(dx){crows.forEach(r=>r._dm=dxMain(r,dx));const i=tblCols.findIndex(c=>c[1]==="Health_Facility");tblCols=[...tblCols.slice(0,i+1),[dx.n,"_dm"],...tblCols.slice(i+1)]}
   const q=$("q").value.trim().toLowerCase(),only=$("onlyCases").checked;
-  tblRows=rows.filter(r=>(!q||[r._zone,r.Woreda,r.Health_Facility,r["Completed by:"]].join(" ").toLowerCase().includes(q))&&(!only||r._watch>0))
-    .sort((a,b)=>{const x=COLS.find(c=>c[1]===sortKey)?.[2]?String(a[sortKey]).localeCompare(String(b[sortKey])):num(a[sortKey])-num(b[sortKey]);return x*sortDir});
+  tblRows=crows.filter(r=>(!q||[r._zone,r.Woreda,r.Health_Facility,r["Completed by:"]].join(" ").toLowerCase().includes(q))&&(!only||r._watch>0));
+  const sc=tblCols.find(c=>(c[3]||c[1])===sortKey)||tblCols.find(c=>c[1]==="_tot");
+  const sk=sc[3]||sc[1];
+  tblRows.sort((a,b)=>{const x=sc[2]&&!sc[3]?String(a[sk]).localeCompare(String(b[sk])):num(a[sk])-num(b[sk]);return x*sortDir});
   const per=25,pages=Math.max(1,Math.ceil(tblRows.length/per));page=Math.min(page,pages-1);
-  $("tbl").innerHTML=`<thead><tr>${COLS.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[1]}">${c[0]}${sortKey===c[1]?(sortDir<0?" ▾":" ▴"):""}</th>`).join("")}</tr></thead><tbody>`+
-    tblRows.slice(page*per,page*per+per).map(r=>`<tr>${COLS.map(c=>`<td class="${c[2]?"l":""}">${c[2]?esc(r[c[1]]):fmt(num(r[c[1]]))}</td>`).join("")}</tr>`).join("")+"</tbody>";
-  $("tbl").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortKey===k?-sortDir:-1;sortKey=k;renderTable(sel())});
+  const sum=k=>tblRows.reduce((s,r)=>s+num(r[k]),0);
+  const E=sum("All_Total_sites_Expected_by_RHB"),O=sum("All_Total_sites_Reported_Ontime");
+  $("tbl").innerHTML=`<thead><tr>${tblCols.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[3]||c[1]}">${esc(c[0])}${sortKey===(c[3]||c[1])?(sortDir<0?" ▾":" ▴"):""}</th>`).join("")}</tr></thead><tbody>`+
+    (tblRows.length?tblRows.slice(page*per,page*per+per).map(r=>`<tr>${tblCols.map(c=>c[1]==="Health_Facility"?`<td class="l clk" ${A("facility",r.Health_Facility,{z:r._zone,w:r.Woreda})}>${esc(r.Health_Facility)}</td>`:`<td class="${c[2]?"l":""}">${c[2]?esc(r[c[1]]):fmt(num(r[c[1]]))}</td>`).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${tblCols.length}"><div class="empty">No facility reports for this selection</div></td></tr>`)+
+    `</tbody><tfoot><tr>${tblCols.map((c,i)=>i===0?`<td class="l">Total · ${fmt(tblRows.length)} reports</td>`:c[1]==="Timeliness"?`<td data-tip="on time ÷ expected, all rows">${E?pct(O,E)+"%":"–"}</td>`:c[2]?"<td></td>":`<td>${fmt(sum(c[1]))}</td>`).join("")}</tr></tfoot>`;
+  $("tbl").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortKey===k?-sortDir:-1;sortKey=k;renderTable(sel(),curRows())});
   $("pinfo").textContent=`${fmt(tblRows.length)} rows · page ${page+1} of ${pages}`;
 }
-$("q").oninput=()=>{page=0;renderTable(sel())};$("onlyCases").onchange=()=>{page=0;renderTable(sel())};
-$("prev").onclick=()=>{page=Math.max(0,page-1);renderTable(sel())};$("next").onclick=()=>{page++;renderTable(sel())};
-$("export").onclick=()=>{
-  const head=COLS.map(c=>c[0]);const lines=[head.join(",")].concat(tblRows.map(r=>COLS.map(c=>`"${String(r[c[1]]??"").replace(/"/g,'""')}"`).join(",")));
-  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/csv"}));a.download=`idsr_${F.year}_w${F.week||"all"}.csv`;a.click();
-};
+const curRows=()=>{const r=sel(),dx=F.disease?DXBY[F.disease]:null;return dx?r.filter(x=>dxHas(x,dx)):r};
+$("q").oninput=()=>{page=0;renderTable(sel(),curRows())};$("onlyCases").onchange=()=>{page=0;renderTable(sel(),curRows())};
+$("prev").onclick=()=>{page=Math.max(0,page-1);renderTable(sel(),curRows())};$("next").onclick=()=>{page++;renderTable(sel(),curRows())};
+$("export").onclick=()=>download(`idsr_${F.year}_w${F.week||"all"}.csv`,
+  [csvLine(tblCols.map(c=>c[0]))].concat(tblRows.map(r=>csvLine(tblCols.map(c=>r[c[1]])))));
 
 /* ---------------- boot ---------------- */
 $("refresh").onclick=()=>load().catch(showErr);
 $("theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark"};
 function showErr(e){$("error").innerHTML='<div class="err">'+esc(e.message)+(location.protocol==="file:"?" You opened index.html from disk, so the browser blocks the data. Use a local server (python3 -m http.server) or open the GitHub Pages link.":"")+'</div>';$("srcText").textContent="No data";$("srcBadge").className="badge warn";$("subtitle").textContent="No data loaded"}
 (function brand(){
-  const c=window.IDSR_CONFIG||{};
-  if(c.TITLE){$("title").textContent=c.TITLE;document.title=c.TITLE}
-  const by="Designed by: "+(c.DESIGNED_BY||"AARDMC");$("by").textContent=by;$("foot").textContent=by;
-  const img=$("logo"),fb=$("logoFb");
-  img.onerror=()=>{img.style.display="none";fb.style.display="flex"};
-  img.src=c.LOGO||"assets/logo.png";
+  if(CFG.TITLE){$("title").textContent=CFG.TITLE;document.title=CFG.TITLE}
+  const by="Designed by: "+(CFG.DESIGNED_BY||"AARDMC");$("by").textContent=by;$("foot").textContent=by;$("lgBy").textContent=by;
+  for(const [i,f] of [["logo","logoFb"],["lgLogo","lgLogoFb"]]){
+    const img=$(i),fb=$(f);img.onerror=()=>{img.style.display="none";fb.style.display="flex"};img.src=CFG.LOGO||"assets/logo.png";
+  }
   const nav=$("nav");const f=()=>nav.classList.toggle("sm",scrollY>40);addEventListener("scroll",f,{passive:true});f();
 })();
-load().catch(showErr);
-const mins=(window.IDSR_CONFIG||{}).REFRESH_MINUTES;if(mins>0)setInterval(()=>load().catch(()=>{}),mins*60000);
+(async function start(){
+  const sid=store.get();
+  if(!sid){$("lgId").focus();return}
+  setBusy(true,"Checking your session…");
+  try{const hit=(await loadCreds()).find(c=>idKey(c.id)===idKey(sid));if(hit&&hit.sub){enter(hit);return}}catch(e){}
+  store.clear();showLogin("");
+})();
+const mins=CFG.REFRESH_MINUTES;if(mins>0)setInterval(()=>{if(USER)load().catch(()=>{})},mins*60000);
 </script>
 </body>
 </html>
