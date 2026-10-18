@@ -7,7 +7,7 @@
 // ------------------------------------------------------------------
 window.IDSR_CONFIG = {
   // ---- data sheet (weekly IDSR facility reports) ----
-  SHEET_URL: "https://docs.google.com/spreadsheets/d/1eT2O1CfgdhkMqxnxoFKYxoyHG8WulCuJIVXL6qI12-o/edit?gid=0#gid=0",
+  SHEET_URL: "https://docs.google.com/spreadsheets/d/1BTi1SYNNyz55z_-OjW47iQEcUoKmhWAolz4D5Pk2QmA/edit?gid=0#gid=0",
   FALLBACK_CSV: "",                        // optional backup file path; leave empty for live data only
   REFRESH_MINUTES: 5,                      // auto-refresh interval (0 = off)
 
