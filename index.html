@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4c1d95">
+<meta name="color-scheme" content="light dark">
 <title>Addis Ababa City PHEM DHIS2 Data Quality Monitoring Dashboard</title>
-<!-- FIX: tab icon uses the same logo as the header/login card -->
 <link rel="icon" href="assets/logo.png" type="image/png">
 <link rel="apple-touch-icon" href="assets/logo.png">
 <style>
@@ -164,6 +165,38 @@ td.h.clk{color:inherit}td.h.clk:hover{text-decoration:none;outline:2px solid var
 .err{background:var(--warn-soft);color:var(--warn);padding:10px 14px;border-radius:10px;margin:0 20px 12px}
 .row-tools{display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
 .row-tools label{display:flex;gap:6px;align-items:center;color:var(--muted)}
+
+/* ===== compatibility / UX upgrades ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:72px}
+body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom)}
+.nav{padding-top:max(12px,env(safe-area-inset-top))}
+.navlink{display:inline-flex;align-items:center;gap:6px;color:#fff;text-decoration:none;font-weight:600;font-size:13px;padding:6px 12px;border-radius:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);white-space:nowrap}
+.navlink:hover{background:rgba(255,255,255,.26);border-color:#fff}
+.navlink:focus-visible,.nav button:focus-visible{outline:2px solid #fde68a;outline-offset:2px}
+[data-act]:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.scroll{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+@media(pointer:coarse){button,select,input,.navlink{min-height:40px}.lgremember input{width:20px;height:20px}}
+@media(max-width:700px){
+  select,input{font-size:16px}
+  .nav,.nav.sm{padding:8px 12px;gap:8px}
+  .nav .by{display:none}
+  .nav>div:last-child{width:100%;flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:2px}
+  .nav>div:last-child>*{flex:none}
+  .ctx{padding:8px 12px 0}
+  .filters{display:grid;grid-template-columns:1fr 1fr;padding:6px 12px 10px}
+  .filters select,.filters input[list]{width:100%;min-width:0}
+  .filters label:has(input){grid-column:1/-1}
+  .filters #reset{grid-column:1/-1}
+  .chips{padding:0 12px 10px}
+  main{padding:0 12px 32px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi .v{font-size:22px}
+  .card{padding:12px}
+  .bar{grid-template-columns:minmax(80px,40%) 1fr 48px}
+  .lgcard{padding:24px 20px 18px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media print{.nav button,.navlink,.filters,.row-tools,.pager,.login,.tabs{display:none!important}.nav{position:static;color:#000;background:none;box-shadow:none}.nav h1{color:#000}.scroll{max-height:none!important;overflow:visible}.card{break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -210,6 +243,7 @@ td.h.clk{color:inherit}td.h.clk:hover{text-decoration:none;outline:2px solid var
     </div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <a class="navlink" href="https://aardmc.github.io/IDSR_Monitorings/" target="_blank" rel="noopener noreferrer" title="Open the IDSR parallel report">IDSR parallel report <span aria-hidden="true">&#8599;</span></a>
     <span class="badge" id="who" title="Signed in"></span>
     <span class="badge" id="srcBadge"><i class="dot"></i><span id="srcText">…</span></span>
     <button id="dlRaw" title="Download the raw source data (all sheet columns, no manipulation) as Excel">⬇ Source (Excel)</button>
@@ -366,8 +400,7 @@ const D=[ // label, cases column, deaths column
 ];
 const WATCH=["AFP / Polio","Anthrax","Cholera","Measles","Meningitis","Neonatal tetanus","Novel influenza subtype","Human rabies","Dengue fever","SARS","Smallpox","Viral hemorrhagic fever","Yellow fever","Rift Valley fever","Mpox","COVID-19","Chikungunya","Chemical poisoning","Relapsing fever","Dysentery","Diarrhea w/ dehydration U5","SAM children U5","Acute jaundice syndrome"];
 const DEATH_ONLY=[["Maternal deaths","Maternal_death"],["Perinatal deaths","Perinatal_death"]];
-/* FIX: Addis Ababa has no standalone health posts — they report through their parent health centre.
-   Health-post expected/reported counts in the sheet are folded into health centres, so we don't list them. */
+/* Addis Ababa has no standalone health posts — they report through their parent health centre. */
 const FTYPES=[["Government health centers","Gov_HCs"],["Government hospitals","Gov_Hosps"],["NGO facilities","NGOHF"],["Other facilities","OtherHFs"]];
 const DX=D.map(d=>({n:d[0],c:d[1],d:d[2]})).concat(DEATH_ONLY.map(d=>({n:d[0],c:null,d:d[1]})));
 const DXBY=Object.fromEntries(DX.map(x=>[x.n,x]));
@@ -436,7 +469,7 @@ function parseAt(raw){
 function prep(o){
   const z=matchZone(o.Zone);
   o._zone=z||(num(o.No_of_Gov_Hosps_expected_by_RHB)>0?OTHER_ZONE:(o.Zone||"Unassigned"));
-  o._status=(o["Completeness Status"]||"").trim()||"Not set";
+  o._status=(o["Completeness Status"]||"").trim()||"Not set";o._timely=pct(num(o.All_Total_sites_Reported_Ontime),num(o.All_Total_sites_Expected_by_RHB));
   o._year=num(o.Year);o._week=num(o.Epi_Week);
   o._tot=D.reduce((s,d)=>s+num(o[d[1]]),0);
   o._death=D.reduce((s,d)=>s+(d[2]?num(o[d[2]]):0),0)+DEATH_ONLY.reduce((s,d)=>s+num(o[d[1]]),0);
@@ -459,14 +492,15 @@ const exportUrl=u=>{const id=sheetId(u);return id?`https://docs.google.com/sprea
 
 let USER=null,DATA=[],RAW=[],RAWHEAD=[],SOURCE="",LOADED=null,FACSET=new Set();
 const atBlank=rows=>rows.filter(r=>!r._atRaw).length/Math.max(1,rows.length);
-async function load(){
+let loading=false;
+async function load(){if(loading)return;loading=true;try{return await load_()}finally{loading=false}}
+async function load_(){
   if(!USER)return;
   const sheetSrc=new URLSearchParams(location.search).get("sheet")||CFG.SHEET_URL||CFG.SHEET_CSV_URL||"";
   const sheet=csvUrl(sheetSrc);
   $("error").innerHTML="";
   let text=null,why="";
   if(sheet){
-    // FIX: label reflects DHIS2 hourly sync, not a generic "live sheet"
     try{text=await fetchText(sheet);if(!text||!text.trim()||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="Live DHIS2 sync (Google Sheet mirror, hourly)"}
     catch(e){text=null;why=e.message}
   }
@@ -509,7 +543,6 @@ async function load(){
   FACSET=new Set(DATA.map(r=>String(r.Health_Facility||"").toLowerCase()));
   LOADED=new Date();
   $("srcText").textContent=SOURCE;
-  // FIX: badge colour check updated to match the new label
   $("srcBadge").className="badge"+(SOURCE.startsWith("Live DHIS2")?"":" warn");
   const withT=DATA.filter(r=>r._atTime).length,withD=DATA.filter(r=>r._atDate).length;
   $("chk").textContent=ATKEY?`“${ATKEY}” column found · date read for ${fmt(withD)} of ${fmt(DATA.length)} reports, time for ${fmt(withT)}`:"No “at:” column found in the sheet headings";
@@ -585,7 +618,7 @@ function enter(hit,remember){
   load().catch(showErr);
 }
 let fails=0,lockUntil=0;
-$("lgEye").onclick=()=>{const i=$("lgId"),show=i.type==="password";i.type=show?"text":"password";$("lgEye").title=$("lgEye").ariaLabel=show?"Hide ID":"Show ID"};
+$("lgEye").onclick=()=>{const i=$("lgId"),show=i.type==="password";i.type=show?"text":"password";{const t=show?"Hide ID":"Show ID";$("lgEye").title=t;$("lgEye").setAttribute("aria-label",t)}};
 $("lgForm").onsubmit=async e=>{
   e.preventDefault();
   const id=$("lgId").value.trim(),err=$("lgErr"),remember=$("lgRemember").checked;
@@ -700,7 +733,7 @@ $("fFac").oninput=e=>typed(()=>{F.facility=e.target.value.trim();page=0;dflPage=
 $("fFac").onblur=e=>{if(F.facility&&!base().some(facMatch))e.target.classList.add("bad")};
 
 /* click-to-filter on any chart, bar, tile, row or cell */
-const A=(act,v,x={})=>`data-act="${act}" data-v="${esc(v)}"`+(x.z!=null?` data-z="${esc(x.z)}"`:"")+(x.w!=null?` data-w="${esc(x.w)}"`:"")+(x.l?` data-l="${x.l}" data-k="${esc(x.k)}"`:"");
+const A=(act,v,x={})=>`tabindex="0" data-act="${act}" data-v="${esc(v)}"`+(x.z!=null?` data-z="${esc(x.z)}"`:"")+(x.w!=null?` data-w="${esc(x.w)}"`:"")+(x.l?` data-l="${x.l}" data-k="${esc(x.k)}"`:"");
 const rowPatch=(l,k,z,w)=>l==="zone"?{zone:k}:l==="wor"?{zone:z,woreda:k}:{zone:z,woreda:w,facility:k};
 document.addEventListener("click",e=>{
   const clr=e.target.closest("[data-clr]");
@@ -738,7 +771,6 @@ function render(){
   const dx=F.disease?DXBY[F.disease]:null;
   const crows=dx?rows.filter(r=>dxHas(r,dx)):rows;
   const wlabel=F.week===""?`${F.year}, all weeks`:`Epi week ${F.week}, ${F.year}`;
-  // FIX: subtitle shows the DHIS2 sync date+time explicitly
   $("subtitle").textContent=`${wlabel} · ${F.facility||F.woreda||F.zone||"Addis Ababa"}${F.disease?" · "+F.disease:""} · ${fmt(rows.length)} facility reports · DHIS2 synced ${LOADED.toLocaleString([], {hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})}`;
 
   const chips=[];
@@ -823,7 +855,6 @@ function render(){
     (perfRows.length?perfRows.map(r=>`<tr class="clk" ${A(aLvl==="zone"?"zone":aLvl==="wor"?"woreda":"facility",r.z,{z:r.zz,w:r.w})}><td class="l">${esc(r.z)}</td><td>${fmt(r.e)}</td><td>${fmt(r.p)}</td><td>${fmt(r.o)}</td><td ${pc(pct(r.p,r.e))}>${pct(r.p,r.e)}%</td><td ${pc(pct(r.o,r.e))}>${pct(r.o,r.e)}%</td><td ${pc(pct(r.d,r.n))} data-tip="${fmt(r.d)} of ${fmt(r.n)} reports have status Completed">${pct(r.d,r.n)}%</td></tr>`).join(""):`<tr><td class="l" colspan="7"><div class="empty">No data for this selection</div></td></tr>`)+
     `</tbody><tfoot><tr><td class="l">Total</td><td>${fmt(tp.e)}</td><td>${fmt(tp.p)}</td><td>${fmt(tp.o)}</td><td ${pc(pct(tp.p,tp.e))}>${pct(tp.p,tp.e)}%</td><td ${pc(pct(tp.o,tp.e))}>${pct(tp.o,tp.e)}%</td><td ${pc(pct(tp.d,tp.n))}>${pct(tp.d,tp.n)}%</td></tr></tfoot>`;
 
-  // FIX: totals row uses all-sites columns so it matches the KPI cards exactly (no health posts included)
   const ft=FTYPES.map(([n,k])=>({n,e:S(rows,`No_of_${k}_expected_by_RHB`),p:S(rows,`No_of_${k}_Reported`),o:S(rows,`No_of_${k}_Reported_Ontime`)}));
   const fe=S(rows,"All_Total_sites_Expected_by_RHB"),fp=S(rows,"All_Total_sites_Reported"),fo=S(rows,"All_Total_sites_Reported_Ontime");
   $("ftype").innerHTML=`<thead><tr><th class="l">Facility type</th><th>Expected</th><th>Reported</th><th>On time</th><th>Timely</th></tr></thead><tbody>`+
@@ -873,7 +904,7 @@ function renderDfl(rows){
 $("dflPrev").onclick=()=>{dflPage=Math.max(0,dflPage-1);renderDfl(sel())};
 $("dflNext").onclick=()=>{dflPage++;renderDfl(sel())};
 const csvLine=a=>a.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",");
-function download(name,lines){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv"}));a.download=name;a.click()}
+function download(name,lines){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+lines.join("\n")],{type:"text/csv"}));a.download=name;a.style.display="none";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
 $("dflExport").onclick=()=>download(`idsr_${(F.disease||"all_diseases").replace(/\W+/g,"_").toLowerCase()}_${F.year}_w${F.week||"all"}.csv`,
   [csvLine(["Disease","Sub-city","Woreda","Health facility","Cases","Deaths","Submitted (at:)","Completed by"])].concat(dflList.map(x=>csvLine([x.dn,x.z,x.w,x.f,x.death?"":x.c,x.d,x.at,x.by]))));
 
@@ -919,7 +950,7 @@ $("pxExport").onclick=()=>download(`idsr_${pxLevel.toLowerCase()}_performance.cs
   [csvLine(["Level","Name","Sub-city","Woreda","Reports","Expected","Reported","On time","Completeness %","Timeliness %","Status completed %"])].concat(pxList.map(o=>csvLine([pxLevel,o.name,o.z,o.w,o.n,o.e,o.p,o.o,o.c,o.t,o.s]))));
 
 /* ---------------- facility table ---------------- */
-const COLS=[["Sub-city","_zone",1],["Woreda","Woreda",1],["Facility","Health_Facility",1],["Malaria","Total_Malaria_Confirmed_and_Clinical"],["Hypert.","Hypertention_new_Total_Cases"],["Diabetes","Diabetic_Mellitus_new_Total_Cases"],["Pneum. U5","Sever_pneumonia_in_children_U5_Total_Cases"],["Total cases","_tot"],["Deaths","_death"],["Status","_status",1],["Timely %","Timeliness"],["Submitted (at:)","_at",1,"_ts"],["By","Completed by:",1]];
+const COLS=[["Sub-city","_zone",1],["Woreda","Woreda",1],["Facility","Health_Facility",1],["Malaria","Total_Malaria_Confirmed_and_Clinical"],["Hypert.","Hypertention_new_Total_Cases"],["Diabetes","Diabetic_Mellitus_new_Total_Cases"],["Pneum. U5","Sever_pneumonia_in_children_U5_Total_Cases"],["Total cases","_tot"],["Deaths","_death"],["Status","_status",1],["Timely %","_timely"],["Submitted (at:)","_at",1,"_ts"],["By","Completed by:",1]];
 let tblRows=[],tblCols=COLS;
 function renderTable(rows,crows){
   const dx=F.disease?DXBY[F.disease]:null;
@@ -934,8 +965,8 @@ function renderTable(rows,crows){
   const sum=k=>tblRows.reduce((s,r)=>s+num(r[k]),0);
   const E=sum("All_Total_sites_Expected_by_RHB"),O=sum("All_Total_sites_Reported_Ontime");
   $("tbl").innerHTML=`<thead><tr>${tblCols.map(c=>`<th class="${c[2]?"l":""}" data-k="${c[3]||c[1]}">${esc(c[0])}${sortKey===(c[3]||c[1])?(sortDir<0?" ▾":" ▴"):""}</th>`).join("")}</tr></thead><tbody>`+
-    (tblRows.length?tblRows.slice(page*per,page*per+per).map(r=>`<tr>${tblCols.map(c=>c[1]==="Health_Facility"?`<td class="l clk" ${A("facility",r.Health_Facility,{z:r._zone,w:r.Woreda})}>${esc(r.Health_Facility)}</td>`:`<td class="${c[2]?"l":""}">${c[2]?esc(r[c[1]]):fmt(num(r[c[1]]))}</td>`).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${tblCols.length}"><div class="empty">No facility reports for this selection</div></td></tr>`)+
-    `</tbody><tfoot><tr>${tblCols.map((c,i)=>i===0?`<td class="l">Total · ${fmt(tblRows.length)} reports</td>`:c[1]==="Timeliness"?`<td data-tip="on time ÷ expected, all rows">${E?pct(O,E)+"%":"–"}</td>`:c[2]?"<td></td>":`<td>${fmt(sum(c[1]))}</td>`).join("")}</tr></tfoot>`;
+    (tblRows.length?tblRows.slice(page*per,page*per+per).map(r=>`<tr>${tblCols.map(c=>c[1]==="Health_Facility"?`<td class="l clk" ${A("facility",r.Health_Facility,{z:r._zone,w:r.Woreda})}>${esc(r.Health_Facility)}</td>`:`<td class="${c[2]?"l":""}">${c[2]?esc(r[c[1]]):fmt(num(r[c[1]]))+(c[1]==="_timely"?"%":"")}</td>`).join("")}</tr>`).join(""):`<tr><td class="l" colspan="${tblCols.length}"><div class="empty">No facility reports for this selection</div></td></tr>`)+
+    `</tbody><tfoot><tr>${tblCols.map((c,i)=>i===0?`<td class="l">Total · ${fmt(tblRows.length)} reports</td>`:c[1]==="_timely"?`<td data-tip="on time ÷ expected, all rows">${E?pct(O,E)+"%":"–"}</td>`:c[2]?"<td></td>":`<td>${fmt(sum(c[1]))}</td>`).join("")}</tr></tfoot>`;
   $("tbl").querySelectorAll("th").forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortKey===k?-sortDir:-1;sortKey=k;renderTable(sel(),curRows())});
   $("pinfo").textContent=`${fmt(tblRows.length)} rows · page ${page+1} of ${pages}`;
 }
@@ -1002,6 +1033,9 @@ async function downloadSourceExcel(){
 $("dlRaw").onclick=downloadSourceExcel;
 
 /* ---------------- boot ---------------- */
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("[data-act]")&&!/^(BUTTON|INPUT|SELECT)$/.test(e.target.tagName)){e.preventDefault();e.target.click()}
+});
 $("refresh").onclick=()=>load().catch(showErr);
 $("theme").onclick=()=>{const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark"};
 function showErr(e){$("error").innerHTML='<div class="err">'+esc(e.message)+(location.protocol==="file:"?" You opened index.html from disk, so the browser blocks the data. Use a local server (python3 -m http.server) or open the GitHub Pages link.":"")+'</div>';$("srcText").textContent="No data";$("srcBadge").className="badge warn";$("subtitle").textContent="No data loaded"}
@@ -1013,7 +1047,6 @@ function showErr(e){$("error").innerHTML='<div class="err">'+esc(e.message)+(loc
   }
   const nav=$("nav");const f=()=>nav.classList.toggle("sm",scrollY>40);addEventListener("scroll",f,{passive:true});f();
 })();
-/* FIX: keep the tab icon in sync with CFG.LOGO so both the header logo and the favicon match */
 (function favicon(){
   const href=CFG.LOGO||"assets/logo.png";
   const rels=["icon","apple-touch-icon","shortcut icon"];
@@ -1027,7 +1060,7 @@ function showErr(e){$("error").innerHTML='<div class="err">'+esc(e.message)+(loc
   const sid=store.get();
   if(!sid){$("lgId").focus();return}
   setBusy(true,"Checking your session…");
-  try{const hit=(await loadCreds()).find(c=>idKey(c.id)===idKey(sid));if(hit&&hit.sub){enter(hit,true);return}}catch(e){}
+  try{const hit=(await loadCreds()).find(c=>idKey(c.id)===idKey(sid));if(hit&&hit.sub){enter(hit,true);return}}catch(e){showLogin("Could not verify your saved session ("+e.message+"). Press Sign in to retry.");return}
   store.clear();showLogin("");
 })();
 const mins=CFG.REFRESH_MINUTES;if(mins>0)setInterval(()=>{if(USER)load().catch(()=>{})},mins*60000);
