@@ -368,6 +368,18 @@ const ZMAP=Object.fromEntries(SUBCITIES.map(z=>[nrm(z),z]));
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtDate=iso=>{const m=String(iso).match(/^(\d{4})-(\d\d)-(\d\d)$/);return m?`${+m[3]} ${MON[+m[2]-1]} ${m[1]}`:iso};
 const fmtDay=iso=>new Date(iso+"T00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+
+/* FIX 1: fuzzy sub-city matcher so "Addis Ketema Sub City", "ADDIS KETEMA ", "Bole Sub-city" etc. all map to the canonical name */
+function matchZone(raw){
+  const n=nrm(raw);
+  if(!n)return null;
+  if(ZMAP[n])return ZMAP[n];
+  const stripped=n.replace(/(subcity|subcityadmin|sub|zone|city|woreda|admin)$/,"");
+  if(ZMAP[stripped])return ZMAP[stripped];
+  const hit=SUBCITIES.find(z=>{const zn=nrm(z);return zn===stripped||zn.startsWith(stripped)||stripped.startsWith(zn)});
+  return hit||null;
+}
+
 const dxMain=(r,x)=>x.c?num(r[x.c]):num(r[x.d]);         // cases (or deaths for death-only items)
 const dxDeaths=(r,x)=>x.c&&x.d?num(r[x.d]):0;
 const dxHas=(r,x)=>(x.c?num(r[x.c]):0)+(x.d?num(r[x.d]):0)>0;
@@ -411,7 +423,8 @@ function parseAt(raw){
   return{date:`${y}-${p2(mo)}-${p2(d)}`,time:hasT?`${p2(h)}:${p2(mi)}`:"",ts:Date.UTC(y,mo-1,d,h,mi)};
 }
 function prep(o){
-  const z=ZMAP[nrm(o.Zone)];
+  // FIX 2: use fuzzy matchZone() instead of strict ZMAP lookup
+  const z=matchZone(o.Zone);
   o._zone=z||(num(o.No_of_Gov_Hosps_expected_by_RHB)>0?OTHER_ZONE:(o.Zone||"Unassigned"));
   o._status=(o["Completeness Status"]||"").trim()||"Not set";
   o._year=num(o.Year);o._week=num(o.Epi_Week);
@@ -456,8 +469,13 @@ async function load(){
   if(ATKEY&&rows.length&&atBlank(rows)>.5&&exportUrl(sheetSrc)){
     try{const t2=await fetchText(exportUrl(sheetSrc));if(t2&&!t2.trim().startsWith("<")){const r2=toObjects(parseCSV(t2)).map(prep);if(r2.length&&atBlank(r2)<atBlank(rows))rows=r2}}catch(e){}
   }
-  /* each sub-city only ever receives its own rows */
-  if(!USER.admin){const k=nrm(USER.sub);rows=rows.filter(r=>nrm(r._zone)===k||nrm(r.Zone)===k)}
+  /* FIX 3: each sub-city only ever receives its own rows — match against the canonical _zone */
+  let presentZones=[];
+  if(!USER.admin){
+    const k=nrm(USER.sub);
+    presentZones=[...new Set(rows.map(r=>r._zone))];
+    rows=rows.filter(r=>nrm(r._zone)===k);
+  }
   DATA=rows;
   FACSET=new Set(DATA.map(r=>String(r.Health_Facility||"").toLowerCase()));
   LOADED=new Date();
@@ -465,7 +483,17 @@ async function load(){
   $("srcBadge").className="badge"+(SOURCE.startsWith("Live")?"":" warn");
   const withT=DATA.filter(r=>r._atTime).length,withD=DATA.filter(r=>r._atDate).length;
   $("chk").textContent=ATKEY?`“${ATKEY}” column found · date read for ${fmt(withD)} of ${fmt(DATA.length)} reports, time for ${fmt(withT)}`:"No “at:” column found in the sheet headings";
-  if(!DATA.length&&!USER.admin)$("error").innerHTML='<div class="err">No reports found for '+esc(USER.sub)+'. Check that the Sub_City name in the ID sheet matches the Zone name in the data sheet.</div>';
+  // FIX 4: actionable error — show which zones the sheet actually contains
+  if(!DATA.length&&!USER.admin){
+    const near=presentZones.filter(z=>matchZone(z)===matchZone(USER.sub));
+    $("error").innerHTML='<div class="err">No reports found for <b>'+esc(USER.sub)+'</b>. '+
+      (presentZones.length
+        ? 'Zone values in the data sheet: '+esc([...new Set(presentZones)].slice(0,10).join(", "))+
+          '. The Sub_City in the ID sheet must match one of these exactly (case/space-insensitive).'+
+          (near.length?' Closest match in data: <b>'+esc(near[0])+'</b> — check spelling in the ID sheet.':'')
+        : 'The data sheet returned no rows at all. Check that it is shared as “Anyone with the link → Viewer”.')+
+      '</div>';
+  }
   initFilters();render();
 }
 
@@ -505,7 +533,8 @@ function showLogin(msg){
 function setBusy(b,t){$("lgBtn").disabled=b;$("lgBtn").classList.toggle("busy",b);$("lgBtnT").textContent=t||(b?"Checking…":"Sign in")}
 function enter(hit){
   const admin=nrm(hit.sub)===nrm(CFG.ADMIN_SUBCITY||"Addis Ababa PHEM");
-  USER={id:hit.id,sub:ZMAP[nrm(hit.sub)]||hit.sub,admin};
+  // FIX 5: canonicalise the sub-city so "bole " / "Bole Sub City" sign in to "Bole"
+  USER={id:hit.id,sub:matchZone(hit.sub)||hit.sub,admin};
   store.set(hit.id);
   Object.assign(F,{year:"",week:"",zone:"",woreda:"",facility:"",disease:"",status:"",day:"",_weekTouched:false});
   $("fDisease").value="";$("fFac").value="";
@@ -565,8 +594,16 @@ function fillWeeks(){
 function fillZones(){
   const present=[...new Set(DATA.map(r=>r._zone))];
   const zs=[...SUBCITIES.filter(z=>present.includes(z)),...present.filter(z=>!SUBCITIES.includes(z)&&z!==OTHER_ZONE).sort(),...(present.includes(OTHER_ZONE)?[OTHER_ZONE]:[])];
-  if(USER&&!USER.admin){F.zone=zs[0]||"";$("fZone").disabled=true}else $("fZone").disabled=false;
-  opts($("fZone"),zs,USER&&!USER.admin?"":"All sub-cities",F.zone);F.zone=$("fZone").value;
+  // FIX 6: non-admin's zone is pinned to USER.sub (the signed-in sub-city), never to zs[0]
+  if(USER&&!USER.admin){
+    F.zone=USER.sub;
+    $("fZone").disabled=true;
+    if(!zs.includes(F.zone)) zs.unshift(F.zone);   // show it in the dropdown even if no data
+  } else {
+    $("fZone").disabled=false;
+  }
+  opts($("fZone"),zs,USER&&!USER.admin?"":"All sub-cities",F.zone);
+  F.zone=$("fZone").value;
   fillWoredas();
 }
 function fillWoredas(){
