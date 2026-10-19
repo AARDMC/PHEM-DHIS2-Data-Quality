@@ -501,7 +501,7 @@ async function load_(){
   $("error").innerHTML="";
   let text=null,why="";
   if(sheet){
-    try{text=await fetchText(sheet);if(!text||!text.trim()||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="Live DHIS2 sync (Google Sheet mirror, hourly)"}
+    try{text=await fetchText(sheet);if(!text||!text.trim()||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="DHIS2 Sync (Every 4 hour)"}
     catch(e){text=null;why=e.message}
   }
   if(!text&&CFG.FALLBACK_CSV){
