@@ -1,6 +1,7 @@
 // Template for config.js.
-// Copy to config.js, then run:
-//   node scripts/set-sheet-url.mjs "<data-sheet-url>" "<id-sheet-url>"
+// Copy to config.js, then run one of:
+//   node scripts/set-sheet-url.mjs "<data-sheet-url>" "<id-sheet-url>"   # public sheets
+//   node scripts/set-sheet-url.mjs --proxy "<data-api-url>" "<id-api-url>" # private sheets
 // That writes the obfuscated links into config.js for you.
 //
 // If you prefer to keep config.js OUT of git entirely:
@@ -16,6 +17,9 @@ window.IDSR_CONFIG = {
   SHEET_URL: __link(""),
   FALLBACK_CSV: "",
   REFRESH_MINUTES: 5,
+
+  DATA_API_URL: __link(""),
+  ID_API_URL: __link(""),
 
   CREDENTIALS_URL: __link(""),
   CREDENTIALS_TAB: "Sub City ID",

@@ -24,6 +24,13 @@ window.IDSR_CONFIG = {
   FALLBACK_CSV: "",                        // optional backup file path; leave empty for live data only
   REFRESH_MINUTES: 5,                      // auto-refresh interval (0 = off)
 
+  // ---- private-sheet bridge (Google Apps Script web app) ----
+  // When these are set, the dashboard reads through the proxy instead of
+  // calling Google directly, so BOTH sheets can be made private.
+  // Set them with: node scripts/set-sheet-url.mjs --proxy <data-url> <id-url>
+  DATA_API_URL: __link(""),
+  ID_API_URL: __link(""),
+
   // ---- sign-in sheet (Sub City ID tab) [obfuscated] ----
   // Headings:  ID  and  Sub_City  (one row per sub-city).
   // A user types their ID on the sign-in page and sees only their Sub_City's reports.

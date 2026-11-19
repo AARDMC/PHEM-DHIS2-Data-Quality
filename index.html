@@ -480,6 +480,10 @@ function prep(o){
   return o;
 }
 async function fetchText(u){const r=await fetch(u,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return r.text()}
+/* Apps Script web apps can be fetched cross-origin; JSONP is the fallback. */
+let __jsonpN=0;
+function fetchJsonp(u){return new Promise((res,rej)=>{const cb="__idsr"+(++__jsonpN),s=document.createElement("script");window[cb]=v=>{delete window[cb];s.remove();res(String(v))};s.onerror=()=>{delete window[cb];s.remove();rej(new Error("JSONP failed"))};s.src=u+(u.includes("?")?"&":"?")+"callback="+cb;document.head.appendChild(s)})}
+async function fetchAny(u){try{return await fetchText(u)}catch(e){return fetchJsonp(u)}}
 const sheetId=u=>(String(u||"").match(/\/spreadsheets\/d\/([\w-]+)/)||[])[1]||"";
 const gidOf=u=>(String(u||"").match(/[?#&]gid=(\d+)/)||[])[1];
 function csvUrl(u){
@@ -497,25 +501,26 @@ async function load(){if(loading)return;loading=true;try{return await load_()}fi
 async function load_(){
   if(!USER)return;
   const sheetSrc=new URLSearchParams(location.search).get("sheet")||CFG.SHEET_URL||CFG.SHEET_CSV_URL||"";
-  const sheet=csvUrl(sheetSrc);
+  const api=CFG.DATA_API_URL||"";
+  const sheet=api||csvUrl(sheetSrc);
   $("error").innerHTML="";
   let text=null,why="";
   if(sheet){
-    try{text=await fetchText(sheet);if(!text||!text.trim()||text.trim().startsWith("<"))throw new Error("Google returned a web page instead of data");SOURCE="DHIS2 Sync (Every 4 hour)"}
+    try{text=await (api?fetchAny(sheet):fetchText(sheet));if(!text||!text.trim()||text.trim().startsWith("<"))throw new Error("the source returned a web page instead of data");SOURCE=api?"DHIS2 Sync (private sheet)":"DHIS2 Sync (Every 4 hour)"}
     catch(e){text=null;why=e.message}
   }
   if(!text&&CFG.FALLBACK_CSV){
     text=await fetchText(CFG.FALLBACK_CSV);SOURCE="Backup CSV (DHIS2 mirror unreachable)";
-    if(sheet)$("error").innerHTML='<div class="err">Could not read the DHIS2 mirror sheet ('+esc(why)+'). Showing the backup CSV instead.</div>';
+    if(sheet)$("error").innerHTML='<div class="err">Could not read the DHIS2 data source ('+esc(why)+'). Showing the backup CSV instead.</div>';
   }
-  if(!text)throw new Error(sheet?"Could not read the DHIS2 mirror sheet ("+why+"). Check that it is shared as \u201CAnyone with the link \u2192 Viewer\u201D and that the tab (gid) in config.js is correct.":"No data source set. Add your Google Sheet link as SHEET_URL in config.js.");
+  if(!text)throw new Error(api?("Could not read the private-sheet proxy ("+why+"). Check DATA_API_URL in config.js and that the web app is deployed as \u201CAnyone\u201D."):(sheet?"Could not read the DHIS2 mirror sheet ("+why+"). Check that it is shared as \u201CAnyone with the link \u2192 Viewer\u201D and that the tab (gid) in config.js is correct.":"No data source set. Add SHEET_URL or DATA_API_URL in config.js."));
 
   const parsedRows=parseCSV(text);
   RAWHEAD=(parsedRows[0]||[]).map(h=>h.trim());
   let rawObjs=toObjects(parsedRows);
   let rows=rawObjs.map(o=>({...o})).map(prep);
 
-  if(ATKEY&&rows.length&&atBlank(rows)>.5&&exportUrl(sheetSrc)){
+  if(!api&&ATKEY&&rows.length&&atBlank(rows)>.5&&exportUrl(sheetSrc)){
     try{const t2=await fetchText(exportUrl(sheetSrc));if(t2&&!t2.trim().startsWith("<")){
       const p2rows=parseCSV(t2);
       const r2=toObjects(p2rows).map(prep);
@@ -553,7 +558,7 @@ async function load_(){
         ? 'Zone values in the data sheet: '+esc([...new Set(presentZones)].slice(0,10).join(", "))+
           '. The Sub_City in the ID sheet must match one of these exactly (case/space-insensitive).'+
           (near.length?' Closest match in data: <b>'+esc(near[0])+'</b> — check spelling in the ID sheet.':'')
-        : 'The data sheet returned no rows at all. Check that it is shared as “Anyone with the link → Viewer”.')+
+        : (api?'The data proxy returned no rows. Check DATA_SHEET_ID and the gid/tab in the Apps Script.':'The data sheet returned no rows at all. Check that it is shared as “Anyone with the link → Viewer”.'))+
       '</div>';
   }
   initFilters();render();
@@ -585,6 +590,17 @@ function parseCreds(text){
   return rows.slice(hr+1).map(r=>({id:(r[ci]||"").trim(),sub:(r[cs]||"").trim()})).filter(c=>c.id);
 }
 async function loadCreds(){
+  if(CFG.ID_API_URL){
+    let why="";
+    try{
+      const t=await fetchAny(CFG.ID_API_URL);
+      if(!t||t.trim().startsWith("<"))throw new Error("the proxy returned a web page");
+      const list=parseCreds(t);
+      if(list.length)return list;
+      why="no rows with an ID and a Sub_City";
+    }catch(e){why=e.message}
+    throw new Error("Could not read the ID proxy ("+why+"). Check ID_API_URL in config.js and the Apps Script ID_SHEET_ID / ID_SHEET_NAME settings.");
+  }
   const id=sheetId(CFG.CREDENTIALS_URL);
   if(!id)throw new Error("The ID sheet is not set. Add CREDENTIALS_URL to config.js.");
   const urls=[];const g=gidOf(CFG.CREDENTIALS_URL);
